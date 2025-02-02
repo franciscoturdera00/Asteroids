@@ -1,9 +1,11 @@
 
-import random
+from copy import deepcopy
+import math
 from typing import List
 import pygame
-from Interactables.Player import Player
-from Interactables.Asteroid import Asteroid, SizeType
+from Interactables_Objects.Bullet import Bullet
+from Interactables_Objects.Player import Player
+from Interactables_Objects.Asteroid import ASTEROID_ORDERED_SIZES, Asteroid, SizeType
 import tkinter as tk
 
 def main():
@@ -14,62 +16,93 @@ def main():
 
     # pygame setup
     pygame.init()
-    screen = pygame.display.set_mode((width - 50, height - 100))
+    screen = pygame.display.set_mode((width - 150, height - 100))
     clock = pygame.time.Clock()
     running = True
     initial_asteroid_number = 5
-    asteroid_max_speed = 5
+    fps = 60
 
     # For debugging
     show_bounds = False
 
     # Initiate Player
     player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-    player = Player(player_pos, scale=0.5, show_bounds=show_bounds)
+    player = Player(player_pos, scale=0.5, fps=60)
 
     # Initiate Asteroids
     asteroids = list()
-    sign = [-1, 1]
     for _ in range(initial_asteroid_number):
-        x_start = random.randrange(0, screen.get_width())
-        y_start = random.randrange(0, screen.get_height())
-        x_vel = random.randint(1, asteroid_max_speed) * random.choice(sign)
-        y_vel = random.randint(1, asteroid_max_speed) * random.choice(sign)
-
-        asteroid = Asteroid(pygame.Vector2(x_start, y_start), SizeType.LARGE, x_vel, y_vel)
+        asteroid = Asteroid(screen, SizeType.LARGE)
         asteroids.append(asteroid)
 
     while running:
-        running = tick_game(screen, player, asteroids)
+        running = tick_game(screen, player, asteroids, show_bounds)
         
         # flip() the display to put your work on screen
         pygame.display.flip()
 
         # limits FPS to 60
-        clock.tick(60) / 1000
+        clock.tick(fps) / 1000
     pygame.quit()
 
 
-def tick_game(screen, player: Player, asteroids: List[Asteroid]):
-    running = True
+# Returns True if the game is still going. False otherwise
+def tick_game(screen, player: Player, asteroids: List[Asteroid], show_bounds):
+    shooting = False
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
+    # pygame.K_SPACE - Checking if SPACE has been pressed (once)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            return False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            shooting = True
+    
+    # interactions
+    if player_collision_detected(player, asteroids):
+        return False
+    
+    handle_bullet_collisions(screen, player.bullets, asteroids)
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("black")
 
     # RENDER GAME
-    player.tick(screen)
+    player.tick(screen, show_bounds=show_bounds) # Tick for bullets happen in here
     for asteroid in asteroids:
-        asteroid.tick(screen)
+        asteroid.tick(screen, show_bounds=show_bounds)
 
-    keys = pygame.key.get_pressed()
+    player.receive_commands(shooting=shooting)
+    return True
 
-    player.receive_commands(keys)
-    return running
 
+def player_collision_detected(player: Player, asteroids: List[Asteroid]):
+    if not player.invincible:
+        for asteroid in asteroids:
+            actual_distance = math.sqrt((player.position.x - asteroid.position.x)**2 + (player.position.y - asteroid.position.y)**2)
+            min_distance = player.scaled_bound_radius + asteroid.boundary_radius
+
+            if actual_distance <= min_distance:
+                return True
+    return False
+
+def handle_bullet_collisions(screen, bullets: List[Bullet], asteroids: List[Asteroid]):
+    for i, bullet in enumerate(bullets):
+        for a, asteroid in enumerate(asteroids):
+            actual_distance = math.sqrt((bullet.position.x - asteroid.position.x)**2 + (bullet.position.y - asteroid.position.y)**2)
+            min_distance = bullet.RADIUS + asteroid.boundary_radius
+
+            if actual_distance <= min_distance:
+                asteroids.remove(asteroid)
+                bullets.remove(bullet)
+                new_type = ASTEROID_ORDERED_SIZES[ASTEROID_ORDERED_SIZES.index(SizeType(asteroid.size)) + 1]
+                if new_type is not None:
+                    for _ in range(2):
+                        new_ast = Asteroid(screen, new_type, deepcopy(asteroid.position))
+                        asteroids.append(new_ast)
+            if a >= len(asteroids):
+                break
+        if i >= len(bullets):
+            break
 
 main()

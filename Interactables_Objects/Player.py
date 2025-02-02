@@ -1,59 +1,80 @@
 
+from copy import deepcopy
 import math
 import random
+from typing import List
 import pygame
 
+from Interactables_Objects.Bullet import Bullet
+from Interactables_Objects.Utils import calculate_new_rotated_position
 
 class Player:
 
     ACCELERATION = 0.1
-    ROTATIONAL_SPEED = 10
+    ROTATIONAL_SPEED = 7
     MAX_SPEED = 5
     BOUNDS_RADIUS = 18
     BOOST_SHOW_PERCENTAGE = 0.8
+    MAX_BULLETS = 10
+    INVINSIBLES_SECONDS = 3
 
-    def __init__(self, position: pygame.Vector2, scale=0.5, starting_angle=0, color="white", show_bounds=False):
+    def __init__(self, position: pygame.Vector2, fps=60, scale=0.5, starting_angle=0, color="white"):
         self.position = position
         self.velocity = [0,0]
         self.scale = scale
-        self.bounds = self.BOUNDS_RADIUS * scale
+        self.scaled_bound_radius = self.BOUNDS_RADIUS * scale
         self.color = color
         self.angle = starting_angle
+
         self.player_shape = [(24 * scale, 0), (-24 * scale, -18 * scale), (-18 * scale, 0), (-24 * scale,  18 * scale)]
-        # self.boost_shape = [(-18 * self.scale, -5 * self.scale), (-18 * self.scale, 5 * self.scale), (-24 * self.scale, 0)]
         self.boost_shape = [(-18 * scale, 0), (-21 * scale, 9 * scale), (-32 * scale, 0 * scale), (-21 * scale, -9 * scale)]
+
         self.boosting = False
+        self.bullets: List[Bullet] = list()
+        self.invincible = True
+        self.invincible_frames = fps * self.INVINSIBLES_SECONDS
+        self.fps = fps
 
-        # For debugging
-        self.show_bounds = show_bounds
-    
 
-    def tick(self, screen: pygame.Surface):
+    def tick(self, screen: pygame.Surface, show_bounds=False):
+        # Update Bullets
+        for bullet in self.bullets:
+            if bullet.frames_left <= 0:
+                self.bullets.remove(bullet)
+            bullet.tick(screen)
+        
         # Update the orientation of Player
         updated_player_shape = list()
         for point in self.player_shape:
-            rotated_x, rotated_y = self._calculate_new_rotated_position(point, self._angle_in_radians())
+            rotated_x, rotated_y = calculate_new_rotated_position(point, self._angle_in_radians())
             updated_player_shape.append((rotated_x, rotated_y))
         
-
-        # Move the player given its momentum
+        # Move the player with its momentum
         self.position.x = (self.position.x + self.velocity[0]) % screen.get_width()
         self.position.y = (self.position.y + self.velocity[1]) % screen.get_height()
 
-        pygame.draw.polygon(screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
+        if self.invincible:
+            pygame.draw.polygon(screen, "gold", [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
+            self.invincible_frames -= 1
+            if self.invincible_frames <= 0:
+                self.invincible = False
+        else:
+            pygame.draw.polygon(screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
         
         if self.boosting and random.random() < self.BOOST_SHOW_PERCENTAGE:
             updated_boost_shape = list()
             for point in self.boost_shape:
-                rotated_boost_x, rotated_boost_y = self._calculate_new_rotated_position(point, self._angle_in_radians())
+                rotated_boost_x, rotated_boost_y = calculate_new_rotated_position(point, self._angle_in_radians())
                 updated_boost_shape.append((rotated_boost_x, rotated_boost_y))
         
             pygame.draw.polygon(screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_boost_shape], 2)
 
-        if self.show_bounds:
-            pygame.draw.circle(screen, "white", self.position, self.bounds, width=1)
+        if show_bounds:
+            pygame.draw.circle(screen, "white", self.position, self.scaled_bound_radius, width=1)
 
-    def receive_commands(self, keys):
+
+    def receive_commands(self, shooting):
+        keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             self._rotate_angle(-1)
         if keys[pygame.K_d]:
@@ -63,6 +84,12 @@ class Player:
             self.boosting = True
         if not keys[pygame.K_w]:
             self.boosting = False
+        
+        if shooting and len(self.bullets) < self.MAX_BULLETS:
+            bullet = Bullet(deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
+            self.bullets.append(bullet)
+        
+        
 
     def _angle_in_radians(self):
         return math.pi * self.angle / 180
@@ -78,10 +105,4 @@ class Player:
     def _rotate_angle(self, direction): # direction in [-1, 1]
         self.angle = (self.angle + direction * self.ROTATIONAL_SPEED) % 360
 
-
-    def _calculate_new_rotated_position(self, point, angle):
-        x, y = point
-        new_x = (x * math.cos(angle)) - (y * math.sin(angle))
-        new_y = (x * math.sin(angle)) + (y * math.cos(angle))
-        return new_x, new_y
 
