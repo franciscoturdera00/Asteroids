@@ -88,8 +88,7 @@ class Player:
         if shooting and len(self.bullets) < self.MAX_BULLETS:
             bullet = Bullet(deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
             self.bullets.append(bullet)
-        
-        
+
 
     def _angle_in_radians(self):
         return math.pi * self.angle / 180
