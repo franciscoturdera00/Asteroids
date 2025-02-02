@@ -1,3 +1,5 @@
+import math
+import random
 import pygame
 
 
@@ -19,4 +21,14 @@ class Asteroid:
     
     def draw(self, screen):
         self.tick(screen)
-        pygame.draw.rect(screen, "red", pygame.Rect(self.position.x, self.position.y, self.size, self.size))
+        pygame.draw.rect(screen, "white", pygame.Rect(self.position.x, self.position.y, self.size, self.size), width=1)
+
+    
+    # def _create_shape(self, num_sides, size):
+    #     # Create a list of points an R distance from the center
+    #     points = list()
+    #     for _ in range(num_sides):
+    #         angle = random.random() * math.pi * 2
+    #         scale = size * random.random() * 0.4 + 0.6 * size
+           
+    #         continue
