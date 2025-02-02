@@ -3,7 +3,7 @@ import random
 from typing import List
 import pygame
 from Interactables.Player import Player
-from Interactables.Asteroid import Asteroid
+from Interactables.Asteroid import Asteroid, SizeType
 import tkinter as tk
 
 def main():
@@ -17,7 +17,7 @@ def main():
     screen = pygame.display.set_mode((width - 50, height - 100))
     clock = pygame.time.Clock()
     running = True
-    initial_asteroid_number = 30
+    initial_asteroid_number = 5
     asteroid_max_speed = 5
 
     # For debugging
@@ -35,9 +35,8 @@ def main():
         y_start = random.randrange(0, screen.get_height())
         x_vel = random.randint(1, asteroid_max_speed) * random.choice(sign)
         y_vel = random.randint(1, asteroid_max_speed) * random.choice(sign)
-        size = random.randrange(10, 40)
 
-        asteroid = Asteroid(pygame.Vector2(x_start, y_start), size, x_vel, y_vel)
+        asteroid = Asteroid(pygame.Vector2(x_start, y_start), SizeType.LARGE, x_vel, y_vel)
         asteroids.append(asteroid)
 
     while running:
@@ -63,9 +62,9 @@ def tick_game(screen, player: Player, asteroids: List[Asteroid]):
     screen.fill("black")
 
     # RENDER GAME
-    player.draw(screen)
+    player.tick(screen)
     for asteroid in asteroids:
-        asteroid.draw(screen)
+        asteroid.tick(screen)
 
     keys = pygame.key.get_pressed()
 
