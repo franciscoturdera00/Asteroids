@@ -29,6 +29,8 @@ class Asteroid:
         self.color = color
         self.boundary_radius = self.size * self.BOUNDARY_SCALAR
 
+        self.explode_sound = pygame.mixer.Sound("Sounds/bangLarge.wav")
+
         self._create_vertices()
     
 

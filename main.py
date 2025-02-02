@@ -22,8 +22,14 @@ def main():
     pygame.display.set_caption("ASTEROIDS")
     clock = pygame.time.Clock()
     running = True
-    initial_asteroid_number = 5
+    initial_asteroid_number = 1
     fps = 60
+
+    # Asteroid game sounds
+    BIG_EXPLODE = pygame.mixer.Sound("Sounds/bangLarge.wav")
+    MEDIUM_EXPLODE = pygame.mixer.Sound("Sounds/bangMedium.wav")
+    SMALL_EXPLODE = pygame.mixer.Sound("Sounds/bangSmall.wav")
+    explosions = [BIG_EXPLODE, MEDIUM_EXPLODE, SMALL_EXPLODE]
 
     # For debugging
     show_bounds = False
@@ -41,13 +47,13 @@ def main():
         asteroids.append(asteroid)
 
     while running:
-        running = tick_game(screen, player, asteroids, score, show_bounds, clock, fps)
+        running = tick_game(screen, player, asteroids, score, show_bounds, clock, fps, explosions)
         
     pygame.quit()
 
 
 # Returns True if the game is still going. False otherwise
-def tick_game(screen, player: Player, asteroids: List[Asteroid], score: Score, show_bounds, clock, fps):
+def tick_game(screen, player: Player, asteroids: List[Asteroid], score: Score, show_bounds, clock, fps, explosions):
     print(score.score)
     shooting = False
     # poll for events
@@ -65,7 +71,11 @@ def tick_game(screen, player: Player, asteroids: List[Asteroid], score: Score, s
         score.player_hit()
         return False
     
-    handle_bullet_collisions(screen, player.bullets, asteroids, score)
+    if len(asteroids) == 0:
+        print("You Won!")
+        return False
+    
+    handle_bullet_collisions(screen, player.bullets, asteroids, score, explosions)
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("black")
@@ -103,7 +113,7 @@ def player_collision_detected(player: Player, asteroids: List[Asteroid]):
                 return True
     return False
 
-def handle_bullet_collisions(screen, bullets: List[Bullet], asteroids: List[Asteroid], score: Score):
+def handle_bullet_collisions(screen, bullets: List[Bullet], asteroids: List[Asteroid], score: Score, explosions):
     for i, bullet in enumerate(bullets):
         for a, asteroid in enumerate(asteroids):
             actual_distance = math.sqrt((bullet.position.x - asteroid.position.x)**2 + (bullet.position.y - asteroid.position.y)**2)
@@ -118,6 +128,13 @@ def handle_bullet_collisions(screen, bullets: List[Bullet], asteroids: List[Aste
                     bullets.remove(bullet)
 
                 # Update asteroids
+                if asteroid.size == SizeType.LARGE.value:
+                    explosions[0].play()
+                elif asteroid.size == SizeType.MEDIUM.value:
+                    explosions[1].play()
+                elif asteroid.size == SizeType.SMALL.value:
+                    explosions[2].play()
+
                 asteroids.remove(asteroid)
                 new_type = ASTEROID_ORDERED_SIZES[ASTEROID_ORDERED_SIZES.index(SizeType(asteroid.size)) + 1]
                 if new_type is not None:

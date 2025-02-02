@@ -35,6 +35,9 @@ class Player:
         self.invincible_frames = fps * self.INVINSIBLES_SECONDS
         self.fps = fps
 
+        self.bullet_sound = pygame.mixer.Sound("Sounds/fire.wav")
+        self.move_sound = pygame.mixer.Sound("Sounds/thrust.wav")
+
 
     def tick(self, screen: pygame.Surface, show_bounds=False):
         # Update Bullets
@@ -88,6 +91,7 @@ class Player:
         if shooting and len(self.bullets) < self.MAX_BULLETS:
             bullet = Bullet(deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
             self.bullets.append(bullet)
+            self.bullet_sound.play()
 
 
     def _angle_in_radians(self):
@@ -99,6 +103,8 @@ class Player:
         # Updates the velocity of the Player object when a player thrusts
         self.velocity[0] = self.velocity[0] + math.cos(self._angle_in_radians()) * acceleration if abs(self.velocity[0]) <= self.MAX_SPEED else self.MAX_SPEED * dir_x
         self.velocity[1] = self.velocity[1] + math.sin(self._angle_in_radians()) * acceleration if abs(self.velocity[1]) <= self.MAX_SPEED else self.MAX_SPEED * dir_y
+
+        self.move_sound.play()
 
     
     def _rotate_angle(self, direction): # direction in [-1, 1]
