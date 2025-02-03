@@ -34,7 +34,7 @@ def main():
 
     NUMBER_BACKGROUND_AESTHETIC_ASTEROIDS = 150
 
-    NUMBER_INITIAL_ASTEROIDS = 5
+    NUMBER_INITIAL_ASTEROIDS = 1
 
     # Set to True to see object bounds and other tools (maybe someday)
     debugging_mode = False
@@ -204,9 +204,12 @@ def _post_screen(win, screen: pygame.Surface, background_asteroids: List[Asteroi
     font_title = pygame.font.SysFont('Smooch Sans', size, bold=True)
     font_play_again = pygame.font.SysFont('Smooch Sans', math.ceil(size / 2))
     boo = pygame.mixer.Sound("Sounds/booing_sound.wav")
+    cheer = pygame.mixer.Sound("Sounds/applause.wav")
     # Play Sounds
+    if win:
+        pygame.mixer.Channel(2).play(cheer)
     if not win:
-        pygame.mixer.Channel(1).play(boo)
+        pygame.mixer.Channel(2).play(boo)
     while True:
 
         # poll for events

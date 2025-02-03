@@ -16,7 +16,7 @@ class Player:
     BOUNDS_RADIUS = 18
     BOOST_SHOW_PERCENTAGE = 0.8
     MAX_BULLETS = 10
-    INVINSIBLES_SECONDS = 3
+    INVINSIBLES_SECONDS = 2
     STARTING_LIVES = 3
 
     def __init__(self, position: pygame.Vector2, fps=60, scale=0.5, starting_angle=0, color="white"):
@@ -35,6 +35,7 @@ class Player:
         self.bullets: List[Bullet] = list()
         self.invincible = True
         self.invincible_frames = fps * self.INVINSIBLES_SECONDS
+        self.show = True
         self.fps = fps
         
         self.thrust_frame = 0
@@ -64,15 +65,21 @@ class Player:
         self.position.x = (self.position.x + self.velocity[0]) % screen.get_width()
         self.position.y = (self.position.y + self.velocity[1]) % screen.get_height()
 
+        # Handle invincible
         if self.invincible:
-            pygame.draw.polygon(screen, "gold", [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
+            if self.invincible_frames % 10 == 0:
+                self.show = not self.show
+            if self.show:
+                pygame.draw.polygon(screen, "gold", [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
             self.invincible_frames -= 1
             if self.invincible_frames <= 0:
                 self.invincible = False
+                self.show = True
         else:
             pygame.draw.polygon(screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
         
-        if self.boosting and random.random() < self.BOOST_SHOW_PERCENTAGE:
+        # Boost
+        if self.boosting and self.show and random.random() < self.BOOST_SHOW_PERCENTAGE:
             updated_boost_shape = list()
             for point in self.boost_shape:
                 rotated_boost_x, rotated_boost_y = calculate_new_rotated_position(point, self._angle_in_radians())
