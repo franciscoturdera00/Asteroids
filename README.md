@@ -1,7 +1,7 @@
 
 # Asteroids
 
-A recreation of the popular game [Asteroids](https://en.wikipedia.org/wiki/Asteroids_(video_game)) in python3
+A recreation of the popular game [Asteroids](https://en.wikipedia.org/wiki/Asteroids_(video_game)) in `python3`
 
 
 ## Prerequisites:
