@@ -10,6 +10,7 @@ class SizeType(IntEnum):
     SMALL=10
 
 ASTEROID_ORDERED_SIZES = [SizeType.LARGE, SizeType.MEDIUM, SizeType.SMALL, None]
+SCALE_BACKGROUND_AESTHETIC_ASTEROIDS = 0.2
     
 class Asteroid:
 
@@ -17,19 +18,30 @@ class Asteroid:
     BOUNDARY_SCALAR = 5 / 6
     MAX_SPEED = 1.5
     MIN_SPEED = 0.3
+    
 
-    def __init__(self, screen: pygame.Surface, sizeType: SizeType, initial_position: pygame.Vector2 = None, color="white"):
+    def __init__(self, screen: pygame.Surface, sizeType: SizeType, initial_position: pygame.Vector2 = None, background=False):
         self.size = sizeType.value
         self.position = initial_position
+        
+
         if not initial_position:
             self.position = pygame.Vector2(random.randrange(0, screen.get_width()), random.randrange(0, screen.get_height()))
+
         sign = [-1, 1]
         self.x_vel = ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED) * random.choice(sign)
         self.y_vel = ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED) * random.choice(sign)
-        self.color = color
-        self.boundary_radius = self.size * self.BOUNDARY_SCALAR
+        
+        rgb = [255, 255, 255]
+        R,G,B = rgb
+        if background:
+            R,G,B = [0.3 * v for v in rgb]
+            self.size *= SCALE_BACKGROUND_AESTHETIC_ASTEROIDS
+            self.x_vel *= 0.1
+            self.y_vel *= 0.1
 
-        self.explode_sound = pygame.mixer.Sound("Sounds/bangLarge.wav")
+        self.boundary_radius = self.size * self.BOUNDARY_SCALAR
+        self.color = (R, G, B)
 
         self._create_vertices()
     
@@ -40,15 +52,16 @@ class Asteroid:
         self.position.y = (self.position.y + self.y_vel * self.SPEED_SCALAR) % screen.get_height()
         
         # Draw asteroid
+        pygame.draw.circle(screen, "black", self.position, self.size * self.BOUNDARY_SCALAR)
         for v in range(len(self.vertices)):
             next_v = self.vertices[(v + 1) % len(self.vertices)]
             this_v = self.vertices[v]
-            pygame.draw.line(screen, "white", 
+            pygame.draw.line(screen, self.color, 
                              (self.position.x + this_v[0] * math.cos(this_v[1] * math.pi / 180),
                             self.position.y + this_v[0] * math.sin(this_v[1] * math.pi / 180)),
                              (self.position.x + next_v[0] * math.cos(next_v[1] * math.pi / 180),
                               self.position.y + next_v[0] * math.sin(next_v[1] * math.pi / 180)))
-        
+            
         if show_bounds:
             pygame.draw.circle(screen, self.color, self.position, self.size * self.BOUNDARY_SCALAR, 1)
             

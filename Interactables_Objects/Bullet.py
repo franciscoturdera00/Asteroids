@@ -7,11 +7,11 @@ from Interactables_Objects.Utils import calculate_new_rotated_position
 
 class Bullet:
 
-    RADIUS = 2
+    RADIUS = 3
     SPEED = 10
     NUMBER_OF_ACTIVE_SECONDS = 5
 
-    def __init__(self, initial_position: pygame.Vector2, angle_of_trajectory, color="white", fps=60):
+    def __init__(self, initial_position: pygame.Vector2, angle_of_trajectory, color="red", fps=60):
         self.position = initial_position
         self.color = color
         self.x_vel = math.cos(angle_of_trajectory) * self.SPEED
@@ -24,4 +24,4 @@ class Bullet:
 
         self.frames_left -= 1
 
-        pygame.draw.circle(screen, self.color, self.position, self.RADIUS)
+        pygame.draw.circle(screen, self.color, self.position, self.RADIUS, 1)
