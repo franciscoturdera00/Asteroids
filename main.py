@@ -32,9 +32,9 @@ def main():
 
     BACKGROUND_MUSIC = pygame.mixer.Sound("Sounds/background_game_music.wav")
 
-    NUMBER_BACKGROUND_AESTHETIC_ASTEROIDS = 30
+    NUMBER_BACKGROUND_AESTHETIC_ASTEROIDS = 150
 
-    NUMBER_INITIAL_ASTEROIDS = 4
+    NUMBER_INITIAL_ASTEROIDS = 5
 
     # Set to True to see object bounds and other tools (maybe someday)
     debugging_mode = False
@@ -71,20 +71,22 @@ def play_game(screen_width, screen_height, initial_asteroid_number, fps, explosi
     player = Player(player_pos, scale=0.5, fps=fps)
     pygame.mixer.Channel(0).play(background_music, loops=1000)
     while running:
-        running = tick_game(screen, player, asteroids, score, lives, clock, fps, explosion_sounds, background_aesthetics=background_asteroids, background_music=background_music, show_bounds=debugging_mode)
+        running = tick_game(screen, player, asteroids, score, lives, clock, fps, explosion_sounds, background_aesthetics=background_asteroids, show_bounds=debugging_mode)
     
     if len(asteroids) == 0:
         print("You Win")
+        player.color = "green"
+        win_screen(screen, background_asteroids, player, asteroids, clock)
         return
-    
-    # Lose Conditions
-    print("You Lose!")
-    player.color = "red"
-    lose_screen(screen, background_asteroids, player, asteroids, clock)
+    else:
+        # Lose Conditions
+        print("You Lose!")
+        player.color = "red"
+        lose_screen(screen, background_asteroids, player, asteroids, clock)
     
 
 # Returns True if the game is still going. False otherwise
-def tick_game(screen: pygame.Surface, player: Player, asteroids: List[Asteroid], score: Score, lives: Lives, clock, fps, explosion_sounds, background_aesthetics: List[Asteroid],background_music, show_bounds=False):
+def tick_game(screen: pygame.Surface, player: Player, asteroids: List[Asteroid], score: Score, lives: Lives, clock, fps, explosion_sounds, background_aesthetics: List[Asteroid], show_bounds=False):
     shooting = False
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -101,6 +103,8 @@ def tick_game(screen: pygame.Surface, player: Player, asteroids: List[Asteroid],
     # interactions
     if player_collision_detected(player, asteroids):
         score.player_hit()
+        player_hit_sound = pygame.mixer.Sound("Sounds/player_hit_sound.wav")
+        player_hit_sound.play()
         dead = lives.die()
         if dead:
             return False
@@ -115,6 +119,7 @@ def tick_game(screen: pygame.Surface, player: Player, asteroids: List[Asteroid],
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("black")
+    # Aesthetics only
     for background_asteroid in background_aesthetics:
         background_asteroid.tick(screen)
 
@@ -129,7 +134,7 @@ def tick_game(screen: pygame.Surface, player: Player, asteroids: List[Asteroid],
 
     # Asteroids
     for asteroid in asteroids:
-        asteroid.tick(screen, show_bounds=show_bounds)
+        asteroid.tick(screen, player.position, show_bounds=show_bounds)
 
     # Score
     score.tick(screen)
@@ -189,10 +194,21 @@ def handle_bullet_collisions(screen, bullets: List[Bullet], asteroids: List[Aste
             break
 
 def lose_screen(screen: pygame.Surface, background_asteroids: List[Asteroid], player: Player, asteroids: List[Asteroid], clock):
+    _post_screen(False, screen, background_asteroids, player, asteroids, clock)
+
+def win_screen(screen: pygame.Surface, background_asteroids: List[Asteroid], player: Player, asteroids: List[Asteroid], clock):
+    _post_screen(True, screen, background_asteroids, player, asteroids, clock)
+
+def _post_screen(win, screen: pygame.Surface, background_asteroids: List[Asteroid], player: Player, asteroids: List[Asteroid], clock):
     size = 100
-    font_title = pygame.font.SysFont('Smooch Sans', size)
+    font_title = pygame.font.SysFont('Smooch Sans', size, bold=True)
     font_play_again = pygame.font.SysFont('Smooch Sans', math.ceil(size / 2))
+    boo = pygame.mixer.Sound("Sounds/booing_sound.wav")
+    # Play Sounds
+    if not win:
+        pygame.mixer.Channel(1).play(boo)
     while True:
+
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
@@ -201,21 +217,29 @@ def lose_screen(screen: pygame.Surface, background_asteroids: List[Asteroid], pl
                 play_again = False
                 return False
             if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.mixer.Channel(7).stop()
                 return True
         # fill the screen with a color to wipe away anything from last frame
         screen.fill("black")
         # Draw background asteroids before text
         [background_asteroid.tick(screen) for background_asteroid in background_asteroids]
         # Draw Text
-        you_lose_surface = font_title.render("OOPS! YOU LOSE!", False, (180, 0, 0))
-        screen.blit(you_lose_surface, (screen.get_width() / 2 - size * 2, screen.get_height() / 2 - size))
+        if win:
+            status_surface = font_title.render("YOU WIN!", False, (0, 180, 0))
+        else:
+            status_surface = font_title.render("OOPS! YOU LOSE!", False, (180, 0, 0))
+        screen.blit(status_surface, (screen.get_width() / 2 - size * 2, screen.get_height() / 2 - size))
 
         play_again_surface = font_play_again.render("Click to Play Again", False, (100, 100, 100))
         screen.blit(play_again_surface, (screen.get_width() / 2 - size, screen.get_height() * 3 / 4 - size))
 
         # Draw rest of (inactive) game
         player.tick(screen)
-        player._rotate_angle(1)
+        if not win:
+            player._rotate_angle(1)
+        else:
+            player.receive_commands(shooting=False)
+
         [asteroid.tick(screen) for asteroid in asteroids]
 
         # flip() the display to put your work on screen

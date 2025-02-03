@@ -35,7 +35,8 @@ class Asteroid:
         rgb = [255, 255, 255]
         R,G,B = rgb
         if background:
-            R,G,B = [0.3 * v for v in rgb]
+            A = random.random() * .2  + .1
+            R,G,B = [A * v for v in rgb]
             self.size *= SCALE_BACKGROUND_AESTHETIC_ASTEROIDS
             self.x_vel *= 0.1
             self.y_vel *= 0.1
@@ -47,7 +48,24 @@ class Asteroid:
     
 
     
-    def tick(self, screen: pygame.Surface, show_bounds=False):
+    def tick(self, screen: pygame.Surface, player_pos: pygame.Vector2 = None, show_bounds=False):
+
+        # Gravitational pull of player on asteroid
+        if player_pos:
+            distance = math.sqrt((self.position.x - player_pos.x)**2 + (self.position.y - player_pos.y)**2)
+            gravitational_effect = 0.000001 * (screen.get_width() - distance)
+            print(gravitational_effect)
+            if player_pos.x < self.position.x:
+                self.x_vel -= gravitational_effect
+            else:
+                self.x_vel += gravitational_effect
+
+            if player_pos.y < self.position.y:
+                self.y_vel -= gravitational_effect
+            else:
+                self.y_vel += gravitational_effect
+        
+        # Update position of asteroid
         self.position.x = (self.position.x + self.x_vel * self.SPEED_SCALAR) % screen.get_width()
         self.position.y = (self.position.y + self.y_vel * self.SPEED_SCALAR) % screen.get_height()
         
