@@ -28,6 +28,11 @@ class Player:
         self.angle = starting_angle
         self.lives: List[Player] = list()
 
+        self.rotate_left = pygame.K_a
+        self.rotate_right = pygame.K_d
+        self.boost = pygame.K_w
+        self.shoot = pygame.K_SPACE
+
         self.player_shape = [(24 * scale, 0), (-24 * scale, -18 * scale), (-18 * scale, 0), (-24 * scale,  18 * scale)]
         self.boost_shape = [(-18 * scale, 0), (-21 * scale, 9 * scale), (-32 * scale, 0 * scale), (-21 * scale, -9 * scale)]
 
@@ -44,7 +49,7 @@ class Player:
 
 
 
-    def tick(self, screen: pygame.Surface, show_bounds=False):
+    def tick(self, screen: pygame.Surface, active_game=True, show_bounds=False):
         # Update Bullets
         for bullet in self.bullets:
             if bullet.frames_left <= 0:
@@ -87,27 +92,34 @@ class Player:
         
             pygame.draw.polygon(screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_boost_shape], 2)
 
+        if active_game:
+            self._draw_bullets(screen)
+
         if show_bounds:
             pygame.draw.circle(screen, "white", self.position, self.scaled_bound_radius, width=1)
 
 
     def receive_commands(self, shooting):
-        if shooting and len(self.bullets) < self.MAX_BULLETS:
+        if shooting and not self.invincible and len(self.bullets) < self.MAX_BULLETS:
             bullet = Bullet(deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
             self.bullets.append(bullet)
             self.bullet_sound.play()
             # pygame.mixer.Channel(1).play(self.bullet_sound)
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
+        if keys[self.rotate_left]:
             self._rotate_angle(-1)
-        if keys[pygame.K_d]:
+        if keys[self.rotate_right]:
             self._rotate_angle(1)
-        if keys[pygame.K_w]:
+        if keys[self.boost]:
             self._accelerate()
             self.boosting = True
-        if not keys[pygame.K_w]:
+        if not keys[self.boost]:
             self.boosting = False
 
+    def _draw_bullets(self, screen: pygame.Surface):
+        for bullet_available in range(self.MAX_BULLETS - len(self.bullets)):
+            pos = pygame.Vector2(screen.get_width() / 25 + 10 * bullet_available, screen.get_height() / 6)
+            pygame.draw.circle(screen, "red", pos, 2)
 
     def _angle_in_radians(self):
         return math.pi * self.angle / 180

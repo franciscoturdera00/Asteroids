@@ -22,4 +22,4 @@ class Lives:
     def tick(self, screen: pygame.Surface):
         # Draw lives
         for i in range(self.number):
-            pygame.draw.polygon(screen, self.color, [(screen.get_width() / 20 + x + (i * 25), screen.get_height() / 10 + y) for x, y in self.life_shape], 2)
+            pygame.draw.polygon(screen, self.color, [(screen.get_width() / 25 + x + (i * 25), screen.get_height() / 8 + y) for x, y in self.life_shape], 2)

@@ -10,28 +10,39 @@ class SizeType(IntEnum):
     SMALL=10
 
 ASTEROID_ORDERED_SIZES = [SizeType.LARGE, SizeType.MEDIUM, SizeType.SMALL, None]
-SCALE_BACKGROUND_AESTHETIC_ASTEROIDS = 0.2
+SCALE_BACKGROUND_AESTHETIC_ASTEROIDS = 0.3
     
 class Asteroid:
 
     SPEED_SCALAR = 2
     BOUNDARY_SCALAR = 5 / 6
-    MAX_SPEED = 1.5
+    MAX_SPEED = 1
     MIN_SPEED = 0.3
     
 
-    def __init__(self, screen: pygame.Surface, sizeType: SizeType, initial_position: pygame.Vector2 = None, background=False):
+    def __init__(self, screen: pygame.Surface, sizeType: SizeType, position = None, is_in_game_spawn=False, background=False):
         self.size = sizeType.value
-        self.position = initial_position
-        
-
-        if not initial_position:
-            self.position = pygame.Vector2(random.randrange(0, screen.get_width()), random.randrange(0, screen.get_height()))
-
         sign = [-1, 1]
-        self.x_vel = ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED) * random.choice(sign)
-        self.y_vel = ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED) * random.choice(sign)
+
+        if position:
+            self.position = position
+            self.x_vel = ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED) * random.choice(sign)
         
+        if not position:
+            if not is_in_game_spawn:
+                self.position = pygame.Vector2(random.randrange(0, screen.get_width()), random.randrange(0, screen.get_height()))
+                self.x_vel = self._generate_random_speed() * random.choice(sign)
+            else:
+                comes_from_left = random.choice([True,False])
+                if comes_from_left:
+                    self.position = pygame.Vector2(0, random.randrange(0, screen.get_height()))
+                    self.x_vel = self._generate_random_speed()
+                else:
+                    self.position = pygame.Vector2(screen.get_width(), random.randrange(0, screen.get_height()))
+                    self.x_vel = 0 - self._generate_random_speed()
+            
+        self.y_vel = self._generate_random_speed() * random.choice(sign)
+
         rgb = [255, 255, 255]
         R,G,B = rgb
         if background:
@@ -46,15 +57,15 @@ class Asteroid:
 
         self._create_vertices()
     
-
+    def _generate_random_speed(self):
+        return ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED)
     
     def tick(self, screen: pygame.Surface, player_pos: pygame.Vector2 = None, show_bounds=False):
 
         # Gravitational pull of player on asteroid
         if player_pos:
-            distance = math.sqrt((self.position.x - player_pos.x)**2 + (self.position.y - player_pos.y)**2)
+            distance = player_pos.distance_to(self.position)
             gravitational_effect = 0.000001 * (screen.get_width() - distance)
-            print(gravitational_effect)
             if player_pos.x < self.position.x:
                 self.x_vel -= gravitational_effect
             else:
