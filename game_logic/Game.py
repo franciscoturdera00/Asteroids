@@ -61,7 +61,7 @@ class Game:
         # Initiate Player
         # TODO: Allow for multiple players
         intial_player_position = pygame.Vector2(self.intial_player_position_x, self.intial_player_position_y)
-        self.player=Player(intial_player_position, fps=self.fps)
+        self.player=Player(self.screen, intial_player_position, fps=self.fps)
 
         # Initiate Asteroids
         self.asteroids: List[Asteroid] = [Asteroid(self.screen, SizeType.LARGE) for _ in range(self.initial_asteroid_number)]
@@ -120,7 +120,7 @@ class Game:
         self.score.tick(self.screen, score_x_loc, score_y_loc)
 
         # Player and bullets
-        self.player.tick(self.screen)
+        self.player.tick()
         self.player.receive_commands(shooting=shooting)
 
         # Lives
@@ -190,7 +190,7 @@ class Game:
         self.screen.blit(play_again_surface, (self.screen_width / 2 - size, self.screen_height * 4 / 5 - size))
 
         # Draw rest of (inactive) game
-        self.player.tick(self.screen, active_game=False)
+        self.player.tick(active_game=False)
         if not self.win:
             self.player._rotate_angle(1)
         else:

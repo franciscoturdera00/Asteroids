@@ -19,7 +19,8 @@ class Player:
     INVINSIBLES_SECONDS = 2
     STARTING_LIVES = 3
 
-    def __init__(self, position: pygame.Vector2, fps=60, scale=0.5, starting_angle=0, color="white", debugging_mode=False):
+    def __init__(self, screen: pygame.Surface, position: pygame.Vector2, fps=60, scale=0.5, starting_angle=0, color="white", debugging_mode=False):
+        self.screen = screen
         self.position = position
         self.velocity = [0,0]
         self.scale = scale
@@ -51,12 +52,12 @@ class Player:
 
 
 
-    def tick(self, screen: pygame.Surface, active_game=True):
+    def tick(self, active_game=True):
         # Update Bullets
         for bullet in self.bullets:
             if bullet.frames_left <= 0:
                 self.bullets.remove(bullet)
-            bullet.tick(screen)
+            bullet.tick()
         
         # Draw life
         for life in self.lives:
@@ -69,21 +70,21 @@ class Player:
             updated_player_shape.append((rotated_x, rotated_y))
         
         # Move the player with its momentum
-        self.position.x = (self.position.x + self.velocity[0]) % screen.get_width()
-        self.position.y = (self.position.y + self.velocity[1]) % screen.get_height()
+        self.position.x = (self.position.x + self.velocity[0]) % self.screen.get_width()
+        self.position.y = (self.position.y + self.velocity[1]) % self.screen.get_height()
 
         # Handle invincible
         if self.invincible:
             if self.invincible_frames % 10 == 0:
                 self.show = not self.show
             if self.show:
-                pygame.draw.polygon(screen, "gold", [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
+                pygame.draw.polygon(self.screen, "gold", [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
             self.invincible_frames -= 1
             if self.invincible_frames <= 0:
                 self.invincible = False
                 self.show = True
         else:
-            pygame.draw.polygon(screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
+            pygame.draw.polygon(self.screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
         
         # Boost
         if self.boosting and self.show and random.random() < self.BOOST_SHOW_PERCENTAGE:
@@ -92,18 +93,18 @@ class Player:
                 rotated_boost_x, rotated_boost_y = calculate_new_rotated_position(point, self._angle_in_radians())
                 updated_boost_shape.append((rotated_boost_x, rotated_boost_y))
         
-            pygame.draw.polygon(screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_boost_shape], 2)
+            pygame.draw.polygon(self.screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_boost_shape], 2)
 
         if active_game:
-            self._draw_bullets(screen)
+            self._draw_bullets(self.screen)
 
         if self.debugging_mode:
-            pygame.draw.circle(screen, "white", self.position, self.scaled_bound_radius, width=1)
+            pygame.draw.circle(self.screen, "white", self.position, self.scaled_bound_radius, width=1)
 
 
     def receive_commands(self, shooting):
         if shooting and not self.invincible and len(self.bullets) < self.MAX_BULLETS:
-            bullet = Bullet(deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
+            bullet = Bullet(self.screen, deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
             self.bullets.append(bullet)
             self.bullet_sound.play()
             # pygame.mixer.Channel(1).play(self.bullet_sound)
