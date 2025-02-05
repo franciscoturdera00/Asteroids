@@ -20,7 +20,7 @@ class Asteroid:
     MIN_SPEED = 0.3
     
 
-    def __init__(self, screen: pygame.Surface, sizeType: SizeType, position = None, is_in_game_spawn=False, background=False):
+    def __init__(self, screen: pygame.Surface, sizeType: SizeType, position = None, is_in_game_spawn=False, background=False, debugging_mode=False):
         self.screen = screen
         self.size = sizeType.value
         sign = [-1, 1]
@@ -57,11 +57,13 @@ class Asteroid:
         self.color = (R, G, B)
 
         self._create_vertices()
+
+        self.debugging_mode = debugging_mode
     
     def _generate_random_speed(self):
         return ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED)
     
-    def tick(self, player_pos: pygame.Vector2 = None, show_bounds=False):
+    def tick(self, player_pos: pygame.Vector2 = None):
 
         # Gravitational pull of player on asteroid
         if player_pos:
@@ -88,7 +90,7 @@ class Asteroid:
                              (self.position.x + next_v[0] * math.cos(next_v[1] * math.pi / 180),
                               self.position.y + next_v[0] * math.sin(next_v[1] * math.pi / 180)))
             
-        if show_bounds:
+        if self.debugging_mode:
             pygame.draw.circle(self.screen, self.color, self.position, self.size * self.BOUNDARY_SCALAR, 1)
             
     def _create_vertices(self):

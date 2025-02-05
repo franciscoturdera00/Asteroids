@@ -61,10 +61,10 @@ class Game:
         # Initiate Player
         # TODO: Allow for multiple players
         intial_player_position = pygame.Vector2(self.intial_player_position_x, self.intial_player_position_y)
-        self.player=Player(self.screen, intial_player_position, fps=self.fps)
+        self.player=Player(self.screen, intial_player_position, fps=self.fps, debugging_mode=self.debugging_mode)
 
         # Initiate Asteroids
-        self.asteroids: List[Asteroid] = [Asteroid(self.screen, SizeType.LARGE) for _ in range(self.initial_asteroid_number)]
+        self.asteroids: List[Asteroid] = [Asteroid(self.screen, SizeType.LARGE, debugging_mode=self.debugging_mode) for _ in range(self.initial_asteroid_number)]
         
     # Returns True if player wants to play again
     def run(self):
@@ -132,7 +132,7 @@ class Game:
         # Spawn new asteroid
         if (self.game_tick / self.fps) % self.asteroid_spawn_rate_seconds == 0.0:
             # Find spawn point not near player
-            new_asteroid = Asteroid(self.screen, random.choice(ASTEROID_ORDERED_SIZES[:-1]), is_in_game_spawn=True)
+            new_asteroid = Asteroid(self.screen, random.choice(ASTEROID_ORDERED_SIZES[:-1]), is_in_game_spawn=True, debugging_mode=self.debugging_mode)
             self.asteroids.append(new_asteroid)
 
         # flip() the display
@@ -242,7 +242,7 @@ class Game:
                     new_type = ASTEROID_ORDERED_SIZES[ASTEROID_ORDERED_SIZES.index(SizeType(asteroid.size)) + 1]
                     if new_type is not None:
                         for _ in range(2):
-                            new_ast = Asteroid(self.screen, new_type, deepcopy(asteroid.position))
+                            new_ast = Asteroid(self.screen, new_type, deepcopy(asteroid.position), debugging_mode=self.debugging_mode)
                             self.asteroids.append(new_ast)
                     
                     # Play asteroid explosion sound

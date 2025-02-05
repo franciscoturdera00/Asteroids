@@ -12,7 +12,7 @@ def main():
     screen_height = 1000
     running = True
     while running:
-        game = Game(screen = pygame.display.set_mode((screen_width, screen_height)))
+        game = Game(screen = pygame.display.set_mode((screen_width, screen_height)), debugging_mode=True)
         running = game.run()
 
 
