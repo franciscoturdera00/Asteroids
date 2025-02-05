@@ -11,6 +11,7 @@ class SizeType(IntEnum):
 
 ASTEROID_ORDERED_SIZES = [SizeType.LARGE, SizeType.MEDIUM, SizeType.SMALL, None]
 SCALE_BACKGROUND_AESTHETIC_ASTEROIDS = 0.3
+GRAVITATIONAL_CONSTANT = 0.0000001
     
 class Asteroid:
 
@@ -69,7 +70,7 @@ class Asteroid:
         if player_pos:
             distance = player_pos.distance_to(self.position)
             # The gravitational effect gets stronger the closer the asteroid is to the player
-            gravitational_effect = 0.000001 * (1500 - distance)
+            gravitational_effect = GRAVITATIONAL_CONSTANT * (1500 - distance) * self.size / 10
             x_direction = -1 if player_pos.x < self.position.x else 1
             self.x_vel += gravitational_effect * x_direction
             y_direction = -1 if player_pos.y < self.position.y else 1
