@@ -22,7 +22,7 @@ class Game:
         self.screen_height=screen.get_height()
         self.fps=60
 
-        self.num_background_asteroids=150
+        self.num_background_asteroids=300
         self.asteroid_spawn_rate_seconds=7
         self.initial_asteroid_number=7
 
@@ -127,7 +127,7 @@ class Game:
         self.lives.tick(self.screen)
 
          # Asteroids
-        [asteroid.tick() for asteroid in self.asteroids]
+        [asteroid.tick(player_pos=self.player.position) for asteroid in self.asteroids]
         
         # Spawn new asteroid
         if (self.game_tick / self.fps) % self.asteroid_spawn_rate_seconds == 0.0:
@@ -196,7 +196,7 @@ class Game:
         else:
             self.player.receive_commands(shooting=False)
 
-        [asteroid.tick() for asteroid in self.asteroids]
+        [asteroid.tick(player_pos=self.player.position) for asteroid in self.asteroids]
 
         # flip() the display to put your work on screen
         pygame.display.flip()

@@ -69,7 +69,7 @@ class Asteroid:
         if player_pos:
             distance = player_pos.distance_to(self.position)
             # The gravitational effect gets stronger the closer the asteroid is to the player
-            gravitational_effect = 0.000001 * (self.screen.get_width() - distance)
+            gravitational_effect = 0.000001 * (1500 - distance)
             x_direction = -1 if player_pos.x < self.position.x else 1
             self.x_vel += gravitational_effect * x_direction
             y_direction = -1 if player_pos.y < self.position.y else 1
