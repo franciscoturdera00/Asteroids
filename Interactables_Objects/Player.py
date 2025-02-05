@@ -19,7 +19,7 @@ class Player:
     INVINSIBLES_SECONDS = 2
     STARTING_LIVES = 3
 
-    def __init__(self, position: pygame.Vector2, fps=60, scale=0.5, starting_angle=0, color="white"):
+    def __init__(self, position: pygame.Vector2, fps=60, scale=0.5, starting_angle=0, color="white", debugging_mode=False):
         self.position = position
         self.velocity = [0,0]
         self.scale = scale
@@ -47,9 +47,11 @@ class Player:
         self.bullet_sound = pygame.mixer.Sound("Sounds/fire.wav")
         self.move_sound = pygame.mixer.Sound("Sounds/thrust.wav")
 
+        self.debugging_mode=debugging_mode
 
 
-    def tick(self, screen: pygame.Surface, active_game=True, show_bounds=False):
+
+    def tick(self, screen: pygame.Surface, active_game=True):
         # Update Bullets
         for bullet in self.bullets:
             if bullet.frames_left <= 0:
@@ -95,7 +97,7 @@ class Player:
         if active_game:
             self._draw_bullets(screen)
 
-        if show_bounds:
+        if self.debugging_mode:
             pygame.draw.circle(screen, "white", self.position, self.scaled_bound_radius, width=1)
 
 
