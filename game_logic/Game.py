@@ -49,10 +49,7 @@ class Game:
 
         # NON-INTERACTABLE OBJECTS
         # Initiate Background Aesthetics
-        background_asteroids = list()
-        for _ in range(self.num_background_asteroids):
-            background_asteroid = Asteroid(self.screen, random.choice([s for s in SizeType]), background=True)
-            background_asteroids.append(background_asteroid)
+        self.background_asteroids: List[Asteroid] = [Asteroid(self.screen, random.choice([s for s in SizeType]), background=True) for _ in range(self.num_background_asteroids)]
         
         self.score = Score()
         self.lives = Lives(self.initial_player_lives)
@@ -67,18 +64,8 @@ class Game:
         self.player=Player(intial_player_position, fps=self.fps)
 
         # Initiate Asteroids
-        self.asteroids: List[Asteroid] = list()
-        for _ in range(self.initial_asteroid_number):
-            asteroid = Asteroid(self.screen, SizeType.LARGE)
-            self.asteroids.append(asteroid)
-
-        # Initiate Background Aesthetics
-        self.background_asteroids: List[Asteroid] = list()
-        for _ in range(self.num_background_asteroids):
-            background_asteroid = Asteroid(self.screen, random.choice([s for s in SizeType]), background=True)
-            self.background_asteroids.append(background_asteroid)
+        self.asteroids: List[Asteroid] = [Asteroid(self.screen, SizeType.LARGE) for _ in range(self.initial_asteroid_number)]
         
-
     # Returns True if player wants to play again
     def run(self):
         #Background music
