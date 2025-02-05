@@ -21,6 +21,7 @@ class Asteroid:
     
 
     def __init__(self, screen: pygame.Surface, sizeType: SizeType, position = None, is_in_game_spawn=False, background=False):
+        self.screen = screen
         self.size = sizeType.value
         sign = [-1, 1]
 
@@ -60,7 +61,7 @@ class Asteroid:
     def _generate_random_speed(self):
         return ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED)
     
-    def tick(self, screen: pygame.Surface, player_pos: pygame.Vector2 = None, show_bounds=False):
+    def tick(self, player_pos: pygame.Vector2 = None, show_bounds=False):
 
         # Gravitational pull of player on asteroid
         if player_pos:
@@ -73,22 +74,22 @@ class Asteroid:
             self.y_vel += gravitational_effect * y_direction
         
         # Update position of asteroid
-        self.position.x = (self.position.x + self.x_vel * self.SPEED_SCALAR) % screen.get_width()
-        self.position.y = (self.position.y + self.y_vel * self.SPEED_SCALAR) % screen.get_height()
+        self.position.x = (self.position.x + self.x_vel * self.SPEED_SCALAR) % self.screen.get_width()
+        self.position.y = (self.position.y + self.y_vel * self.SPEED_SCALAR) % self.screen.get_height()
         
         # Draw asteroid
-        pygame.draw.circle(screen, "black", self.position, self.size * self.BOUNDARY_SCALAR)
+        pygame.draw.circle(self.screen, "black", self.position, self.size * self.BOUNDARY_SCALAR)
         for v in range(len(self.vertices)):
             next_v = self.vertices[(v + 1) % len(self.vertices)]
             this_v = self.vertices[v]
-            pygame.draw.line(screen, self.color, 
+            pygame.draw.line(self.screen, self.color, 
                              (self.position.x + this_v[0] * math.cos(this_v[1] * math.pi / 180),
                             self.position.y + this_v[0] * math.sin(this_v[1] * math.pi / 180)),
                              (self.position.x + next_v[0] * math.cos(next_v[1] * math.pi / 180),
                               self.position.y + next_v[0] * math.sin(next_v[1] * math.pi / 180)))
             
         if show_bounds:
-            pygame.draw.circle(screen, self.color, self.position, self.size * self.BOUNDARY_SCALAR, 1)
+            pygame.draw.circle(self.screen, self.color, self.position, self.size * self.BOUNDARY_SCALAR, 1)
             
     def _create_vertices(self):
         # Make random asteroid sprite

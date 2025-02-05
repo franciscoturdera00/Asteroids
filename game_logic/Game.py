@@ -113,7 +113,7 @@ class Game:
         # fill the screen with a color to wipe away anything from last frame
         self.screen.fill("black")
         # Aesthetics only
-        [background_asteroid.tick(self.screen) for background_asteroid in self.background_asteroids]
+        [background_asteroid.tick() for background_asteroid in self.background_asteroids]
         # Score
         score_x_loc = self.screen_width / 25
         score_y_loc = self.screen_height / 20
@@ -127,7 +127,7 @@ class Game:
         self.lives.tick(self.screen)
 
          # Asteroids
-        [asteroid.tick(self.screen) for asteroid in self.asteroids]
+        [asteroid.tick() for asteroid in self.asteroids]
         
         # Spawn new asteroid
         if (self.game_tick / self.fps) % self.asteroid_spawn_rate_seconds == 0.0:
@@ -178,7 +178,7 @@ class Game:
         # fill the screen with a color to wipe away anything from last frame
         self.screen.fill("black")
         # Draw background asteroids before text
-        [background_asteroid.tick(self.screen) for background_asteroid in self.background_asteroids]
+        [background_asteroid.tick() for background_asteroid in self.background_asteroids]
 
         self.screen.blit(status_surface, (self.screen_width / 2 - size * 2, self.screen_height / 2 - size))
 
@@ -196,7 +196,7 @@ class Game:
         else:
             self.player.receive_commands(shooting=False)
 
-        [asteroid.tick(self.screen) for asteroid in self.asteroids]
+        [asteroid.tick() for asteroid in self.asteroids]
 
         # flip() the display to put your work on screen
         pygame.display.flip()
