@@ -1,6 +1,7 @@
 from enum import IntEnum
 import math
 import random
+from typing import List
 import pygame
 
 
@@ -64,9 +65,9 @@ class Asteroid:
         self.update(player_pos)
         self.render()
     
-    def update(self, player_pos: pygame.Vector2 = None):
+    def update(self, players_pos: List[pygame.Vector2] = list()):
         # Gravitational pull of player on asteroid
-        if player_pos:
+        for player_pos in players_pos:
             distance = player_pos.distance_to(self.position)
             # The gravitational effect gets stronger the closer the asteroid is to the player
             gravitational_effect = GRAVITATIONAL_CONSTANT * (1500 - distance) * self.size / 10

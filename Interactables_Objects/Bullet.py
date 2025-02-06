@@ -18,10 +18,6 @@ class Bullet:
         self.x_vel = math.cos(angle_of_trajectory) * self.SPEED
         self.y_vel = math.sin(angle_of_trajectory) * self.SPEED
         self.frames_left = fps * self.NUMBER_OF_ACTIVE_SECONDS
-    
-    def tick(self):
-        self.update()
-        self.render()
 
     
     def update(self):

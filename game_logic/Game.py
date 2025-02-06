@@ -27,8 +27,7 @@ class Game:
         self.initial_asteroid_number=7
 
         self.initial_player_lives=3
-        self.intial_player_position_x = self.screen_width / 2
-        self.intial_player_position_y = self.screen_height / 2
+        self.intial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]
         self.intial_player_position = pygame.Vector2(self.screen_width / 2, self.screen_height / 2)
         
    
@@ -52,16 +51,25 @@ class Game:
         self.background_asteroids: List[Asteroid] = [Asteroid(self.screen, random.choice([s for s in SizeType]), background=True) for _ in range(self.num_background_asteroids)]
         
         self.score = Score(self.screen)
-        self.lives = Lives(self.screen, self.initial_player_lives)
         self.clock = pygame.time.Clock()
         self.game_tick = 0
         self.win = False
         
         # INTERACTABLE OBJECTS
         # Initiate Player
-        # TODO: Allow for multiple players
-        intial_player_position = pygame.Vector2(self.intial_player_position_x, self.intial_player_position_y)
-        self.player=Player(self.screen, intial_player_position, fps=self.fps, debugging_mode=self.debugging_mode)
+        player_1_initial_position =- pygame.Vector2(self.intial_players_positions[0][0], self.intial_players_positions[0][1])
+        player1 = Player(0, self.screen, player_1_initial_position,  fps=self.fps, debugging_mode=self.debugging_mode)
+        self.players = [player1]
+
+        if len(self.intial_players_positions) == 2:
+            player_2_initial_position =- pygame.Vector2(self.intial_players_positions[1][0], self.intial_players_positions[1][1])
+            player2 = Player(1, self.screen, player_2_initial_position,  fps=self.fps, color="blue",
+                             thrust_button=pygame.K_i, rotate_left_button=pygame.K_j, rotate_right_button=pygame.K_l, shoot_button=pygame.K_p,
+                             debugging_mode=self.debugging_mode)
+            self.players.append(player2)
+
+        
+        # self.player=Player(self.screen, intial_player_position, fps=self.fps, debugging_mode=self.debugging_mode)
 
         # Initiate Asteroids
         self.asteroids: List[Asteroid] = [Asteroid(self.screen, SizeType.LARGE, debugging_mode=self.debugging_mode) for _ in range(self.initial_asteroid_number)]
@@ -86,9 +94,10 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                self.score.bullet_fired()
-                shooting = True
+            for player in self.players:
+                if event.type == pygame.KEYDOWN and event.key == player.shoot:
+                    self.score.bullet_fired()
+                    player.shoot_bullet()
 
         # limits FPS to 60
         self.clock.tick(self.fps)
@@ -100,14 +109,15 @@ class Game:
             return False
         
         # interactions
-        if self._player_collision_detected():
-            self.score.player_hit()
-            pygame.mixer.Channel(6).play(self.player_hit_sound)
-            dead = self.lives.die()
-            if dead:
-                return False
-            else:
-                self.player.restart_position(self.screen, invincible=True)
+        for player in self.players:
+            if self._player_collision_detected(player):
+                self.score.player_hit()
+                pygame.mixer.Channel(6).play(self.player_hit_sound)
+                dead = player.lives.die()
+                if dead:
+                    return False
+                else:
+                    player.restart_position(self.screen, invincible=True)
         
         self._handle_bullet_collisions()
 
@@ -115,8 +125,9 @@ class Game:
         [background_asteroid.update() for background_asteroid in self.background_asteroids]
 
         # Player and bullets
-        self.player.update()
-        self.player.receive_commands(shooting=shooting)
+        for player in self.players:
+            player.update()
+            player.receive_commands()
 
         # Spawn new asteroid
         if (self.game_tick / self.fps) % self.asteroid_spawn_rate_seconds == 0.0:
@@ -124,7 +135,7 @@ class Game:
             self.asteroids.append(new_asteroid)
 
         # Asteroids
-        [asteroid.update(player_pos=self.player.position) for asteroid in self.asteroids]
+        [asteroid.update(players_pos=[player.position for player in self.players]) for asteroid in self.asteroids]
 
         # Score
         self.score.update()
@@ -140,10 +151,9 @@ class Game:
         [background_asteroid.render() for background_asteroid in self.background_asteroids]
 
         # Player and bullets
-        self.player.render()
-
-        # Lives
-        self.lives.render()
+        for player in self.players:
+            player.render()
+            player.lives.render()
 
         # Score
         # Score
@@ -171,11 +181,13 @@ class Game:
         if self.win:
             pygame.mixer.Channel(channel).play(cheer)
             status_surface = font_title.render("YOU WIN!", False, (0, 180, 0))
-            self.player.color = "green"
+            for player in self.players:
+                player.color = "green"
         if not self.win:
             pygame.mixer.Channel(channel).play(boo)
             status_surface = font_title.render("OOPS! YOU LOSE!", False, (180, 0, 0))
-            self.player.color = "red"
+            for player in self.players:
+                player.color = "red"
         
         running = True
         while running == True: # running: [True, False, "quit"]
@@ -198,17 +210,19 @@ class Game:
                 return False
             
         # Background Aesthetics
-        [background_asteroid.update(self.player.position) for background_asteroid in self.background_asteroids] 
+        [background_asteroid.update([player.position for player in self.players]) for background_asteroid in self.background_asteroids] 
 
         # Update rest of (inactive) game
-        if not self.win:
-            self.player.rotate_angle(1)
-        else:
-            self.player.receive_commands(shooting=False) 
-        self.player.update()
+        for player in self.players:
+            if not self.win:
+                player.rotate_angle(1)
+            else:
+                player.receive_commands() 
+            for player in self.players:
+                player.update()
         
         # Asteorids
-        [asteroid.update(player_pos=self.player.position) for asteroid in self.asteroids]
+        [asteroid.update(players_pos=[player.position for player in self.players]) for asteroid in self.asteroids]
 
         return True
     
@@ -232,7 +246,8 @@ class Game:
         self.screen.blit(play_again_surface, (self.screen_width / 2 - size, self.screen_height * 4 / 5 - size))
         
         # Player
-        self.player.render(active_game=False)
+        for player in self.players:
+            player.render(active_game=False)
 
         # Asteroids
         [asteroid.render() for asteroid in self.asteroids]
@@ -242,11 +257,11 @@ class Game:
 
 
         
-    def _player_collision_detected(self):
-        if not self.player.invincible:
+    def _player_collision_detected(self, player: Player):
+        if not player.invincible:
             for asteroid in self.asteroids:
-                actual_distance = self.player.position.distance_to(asteroid.position)
-                min_distance = self.player.scaled_bound_radius + asteroid.boundary_radius
+                actual_distance = player.position.distance_to(asteroid.position)
+                min_distance = player.scaled_bound_radius + asteroid.boundary_radius
 
                 if actual_distance <= min_distance:
                     return True
@@ -259,7 +274,7 @@ class Game:
         self.win = True
     
     def _handle_bullet_collisions(self):
-        bullets = self.player.bullets
+        bullets = [bullet for player in self.players for bullet in player.bullets]
         for bullet_index, bullet in enumerate(bullets):
             for asteroid_index, asteroid in enumerate(self.asteroids):
                 actual_distance = bullet.position.distance_to(asteroid.position)

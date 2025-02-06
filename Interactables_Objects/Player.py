@@ -7,6 +7,8 @@ import pygame
 
 from Interactables_Objects.Bullet import Bullet
 from Interactables_Objects.Utils import calculate_new_rotated_position
+from game_logic.Lives import Lives
+from game_logic.Score import Score
 
 class Player:
 
@@ -19,7 +21,11 @@ class Player:
     INVINSIBLES_SECONDS = 2
     STARTING_LIVES = 3
 
-    def __init__(self, screen: pygame.Surface, position: pygame.Vector2, fps=60, scale=0.5, starting_angle=0, color="white", debugging_mode=False):
+    def __init__(self, id, screen: pygame.Surface, position: pygame.Vector2, 
+                 fps=60, scale=0.5, starting_angle=0, color="white", 
+                 thrust_button=pygame.K_w, rotate_left_button=pygame.K_a, rotate_right_button=pygame.K_d, shoot_button=pygame.K_SPACE,
+                 debugging_mode=False):
+        self.id = id
         self.screen = screen
         self.position = position
         self.velocity = [0,0]
@@ -27,12 +33,12 @@ class Player:
         self.scaled_bound_radius = self.BOUNDS_RADIUS * scale
         self.color = color
         self.angle = starting_angle
-        self.lives: List[Player] = list()
+        self.lives = Lives(id, screen)
 
-        self.rotate_left = pygame.K_a
-        self.rotate_right = pygame.K_d
-        self.boost = pygame.K_w
-        self.shoot = pygame.K_SPACE
+        self.rotate_left = rotate_left_button
+        self.rotate_right = rotate_right_button
+        self.boost = thrust_button
+        self.shoot = shoot_button
 
         self.player_shape = [(24 * scale, 0), (-24 * scale, -18 * scale), (-18 * scale, 0), (-24 * scale,  18 * scale)]
         self.boost_shape = [(-18 * scale, 0), (-21 * scale, 9 * scale), (-32 * scale, 0 * scale), (-21 * scale, -9 * scale)]
@@ -58,9 +64,11 @@ class Player:
     
     def update(self):
         # Update Bullets
-        for bullet in self.bullets:
+        for i, bullet in enumerate(self.bullets):
             if bullet.frames_left <= 0:
                 self.bullets.remove(bullet)
+            if i >= len(self.bullets):
+                break
             bullet.update()
         
         # Move the player with its momentum
@@ -82,8 +90,7 @@ class Player:
         [bullet.render() for bullet in self.bullets]
 
         # Draw lives
-        for life in self.lives:
-            life.render()
+        self.lives.render()
         
         # Draw player according to the angular orientation of Player
         updated_player_shape = list()
@@ -114,12 +121,7 @@ class Player:
         
 
 
-    def receive_commands(self, shooting):
-        if shooting and not self.invincible and len(self.bullets) < self.MAX_BULLETS:
-            bullet = Bullet(self.screen, deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
-            self.bullets.append(bullet)
-            self.bullet_sound.play()
-            # pygame.mixer.Channel(1).play(self.bullet_sound)
+    def receive_commands(self):
         keys = pygame.key.get_pressed()
         if keys[self.rotate_left]:
             self.rotate_angle(-1)
@@ -131,9 +133,15 @@ class Player:
         if not keys[self.boost]:
             self.boosting = False
 
+    def shoot_bullet(self):
+        if not self.invincible and len(self.bullets) < self.MAX_BULLETS:
+            bullet = Bullet(self.screen, deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
+            self.bullets.append(bullet)
+            self.bullet_sound.play()
+
     def _draw_bullets_remaining(self, screen: pygame.Surface):
         for bullet_available in range(self.MAX_BULLETS - len(self.bullets)):
-            pos = pygame.Vector2(screen.get_width() / 25 + 10 * bullet_available, screen.get_height() / 6)
+            pos = pygame.Vector2(screen.get_width() / 25 + 10 * bullet_available, screen.get_height() / 6 + self.id * 75)
             pygame.draw.circle(screen, "red", pos, 2)
 
     def _angle_in_radians(self):
