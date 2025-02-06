@@ -198,7 +198,7 @@ class Game:
                 return False
             
         # Background Aesthetics
-        [background_asteroid.update() for background_asteroid in self.background_asteroids] 
+        [background_asteroid.update(self.player.position) for background_asteroid in self.background_asteroids] 
 
         # Update rest of (inactive) game
         if not self.win:
