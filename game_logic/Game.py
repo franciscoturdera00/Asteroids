@@ -87,7 +87,6 @@ class Game:
 
     # Returns True if the game is still going, False otherwise
     def _update_game(self):
-        shooting = False
         # Game events (user-input and more)
         # pygame.QUIT - user clicked X to close your window
         # pygame.K_SPACE - checking if SPACE has been pressed (once)
@@ -95,7 +94,7 @@ class Game:
             if event.type == pygame.QUIT:
                 return False
             for player in self.players:
-                if event.type == pygame.KEYDOWN and event.key == player.shoot:
+                if not player.is_dead() and event.type == pygame.KEYDOWN and event.key == player.shoot:
                     self.score.bullet_fired()
                     player.shoot_bullet()
 
@@ -110,14 +109,20 @@ class Game:
         
         # interactions
         for player in self.players:
-            if self._player_collision_detected(player):
+            if player.is_dead():
+                player.color = "red"
+                player.rotate_angle(1)
+            if not player.is_dead() and self._player_collision_detected(player):
                 self.score.player_hit()
                 pygame.mixer.Channel(6).play(self.player_hit_sound)
                 dead = player.lives.die()
-                if dead:
-                    return False
-                else:
+                # if dead:
+                #     return False
+                if not dead:
                     player.restart_position(self.screen, invincible=True)
+        all_dead = all([player.is_dead() for player in self.players])
+        if all_dead:
+            return False
         
         self._handle_bullet_collisions()
 
@@ -127,7 +132,8 @@ class Game:
         # Player and bullets
         for player in self.players:
             player.update()
-            player.receive_commands()
+            if not player.is_dead():
+                player.receive_commands()
 
         # Spawn new asteroid
         if (self.game_tick / self.fps) % self.asteroid_spawn_rate_seconds == 0.0:
@@ -214,12 +220,11 @@ class Game:
 
         # Update rest of (inactive) game
         for player in self.players:
-            if not self.win:
+            if not self.win or player.is_dead():
                 player.rotate_angle(1)
             else:
                 player.receive_commands() 
-            for player in self.players:
-                player.update()
+            player.update()
         
         # Asteorids
         [asteroid.update(players_pos=[player.position for player in self.players]) for asteroid in self.asteroids]

@@ -55,12 +55,6 @@ class Player:
         self.move_sound = pygame.mixer.Sound("Sounds/thrust.wav")
 
         self.debugging_mode=debugging_mode
-
-
-
-    def tick(self, active_game=True):
-        self.update()
-        self.render(active_game)
     
     def update(self):
         # Update Bullets
@@ -119,7 +113,8 @@ class Player:
             pygame.draw.circle(self.screen, "white", self.position, self.scaled_bound_radius, width=1)
 
         
-
+    def is_dead(self):
+        return self.lives.number <= 0
 
     def receive_commands(self):
         keys = pygame.key.get_pressed()
