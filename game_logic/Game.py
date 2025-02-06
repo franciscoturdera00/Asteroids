@@ -20,7 +20,7 @@ class Game:
         self.screen=screen
         self.screen_width=screen.get_width()
         self.screen_height=screen.get_height()
-        self.fps=60
+        self.fps=30
 
         self.num_background_asteroids=300
         self.asteroid_spawn_rate_seconds=7

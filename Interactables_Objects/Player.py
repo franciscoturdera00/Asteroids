@@ -11,7 +11,7 @@ from Interactables_Objects.Utils import calculate_new_rotated_position
 class Player:
 
     ACCELERATION = 0.1
-    ROTATIONAL_SPEED = 7
+    ROTATIONAL_SPEED = 10
     MAX_SPEED = 5
     BOUNDS_RADIUS = 18
     BOOST_SHOW_PERCENTAGE = 0.8
