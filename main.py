@@ -9,8 +9,8 @@ def main():
     pygame.display.set_caption("ASTEROIDS")
 
     # Start Game
-    screen_width = 1700
-    screen_height = 1000
+    screen_width = 1400
+    screen_height = 900
     running = True
     while running:
         game = Game(screen = pygame.display.set_mode((screen_width, screen_height)), debugging_mode=False)
