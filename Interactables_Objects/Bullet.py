@@ -20,9 +20,14 @@ class Bullet:
         self.frames_left = fps * self.NUMBER_OF_ACTIVE_SECONDS
     
     def tick(self):
+        self.update()
+        self.render()
+
+    
+    def update(self):
         self.position.x = (self.position.x + self.x_vel) % self.screen.get_width()
         self.position.y = (self.position.y + self.y_vel) % self.screen.get_height()
-
         self.frames_left -= 1
-
+    
+    def render(self):
         pygame.draw.circle(self.screen, self.color, self.position, self.RADIUS)

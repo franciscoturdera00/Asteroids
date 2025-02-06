@@ -5,8 +5,9 @@ import pygame
 
 class Lives:
 
-    def __init__(self, num=3, scale=.4):
+    def __init__(self, screen: pygame.Surface, num=3, scale=.4):
         self.number = num
+        self.screen = screen
         A = 0.5
         self.color = [255 * A, 255 * A, 255 * A]
         self.life_shape = [(0, -24 * scale), (18 * scale, 24 * scale), (0, 18 * scale), (-18 * scale, 24 * scale)]
@@ -19,7 +20,10 @@ class Lives:
             return True
         return False
     
-    def tick(self, screen: pygame.Surface):
+    def tick(self):
+        self.render()
+    
+    def render(self):
         # Draw lives
         for i in range(self.number):
-            pygame.draw.polygon(screen, self.color, [(screen.get_width() / 25 + x + (i * 25), screen.get_height() / 8 + y) for x, y in self.life_shape], 2)
+            pygame.draw.polygon(self.screen, self.color, [(self.screen.get_width() / 25 + x + (i * 25), self.screen.get_height() / 8 + y) for x, y in self.life_shape], 2)

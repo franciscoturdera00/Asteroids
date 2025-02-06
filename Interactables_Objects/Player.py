@@ -53,40 +53,50 @@ class Player:
 
 
     def tick(self, active_game=True):
+        self.update()
+        self.render(active_game)
+    
+    def update(self):
         # Update Bullets
         for bullet in self.bullets:
             if bullet.frames_left <= 0:
                 self.bullets.remove(bullet)
-            bullet.tick()
-        
-        # Draw life
-        for life in self.lives:
-            life.tick()
-        
-        # Update the orientation of Player
-        updated_player_shape = list()
-        for point in self.player_shape:
-            rotated_x, rotated_y = calculate_new_rotated_position(point, self._angle_in_radians())
-            updated_player_shape.append((rotated_x, rotated_y))
+            bullet.update()
         
         # Move the player with its momentum
         self.position.x = (self.position.x + self.velocity[0]) % self.screen.get_width()
         self.position.y = (self.position.y + self.velocity[1]) % self.screen.get_height()
 
-        # Handle invincible
+        # Handle invincibility
         if self.invincible:
             if self.invincible_frames % 10 == 0:
                 self.show = not self.show
-            if self.show:
-                pygame.draw.polygon(self.screen, "gold", [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
             self.invincible_frames -= 1
             if self.invincible_frames <= 0:
                 self.invincible = False
                 self.show = True
-        else:
-            pygame.draw.polygon(self.screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
         
-        # Boost
+
+    def render(self, active_game=True):
+        # Draw bullets
+        [bullet.render() for bullet in self.bullets]
+
+        # Draw lives
+        for life in self.lives:
+            life.render()
+        
+        # Draw player according to the angular orientation of Player
+        updated_player_shape = list()
+        for point in self.player_shape:
+            rotated_x, rotated_y = calculate_new_rotated_position(point, self._angle_in_radians())
+            updated_player_shape.append((rotated_x, rotated_y))
+        if self.show:
+            if self.invincible:
+                pygame.draw.polygon(self.screen, "gold", [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)  
+            else:
+                pygame.draw.polygon(self.screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
+        
+        # Draw Boost
         if self.boosting and self.show and random.random() < self.BOOST_SHOW_PERCENTAGE:
             updated_boost_shape = list()
             for point in self.boost_shape:
@@ -94,12 +104,14 @@ class Player:
                 updated_boost_shape.append((rotated_boost_x, rotated_boost_y))
         
             pygame.draw.polygon(self.screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_boost_shape], 2)
-
+        
         if active_game:
-            self._draw_bullets(self.screen)
+            self._draw_bullets_remaining(self.screen)
 
         if self.debugging_mode:
             pygame.draw.circle(self.screen, "white", self.position, self.scaled_bound_radius, width=1)
+
+        
 
 
     def receive_commands(self, shooting):
@@ -110,16 +122,16 @@ class Player:
             # pygame.mixer.Channel(1).play(self.bullet_sound)
         keys = pygame.key.get_pressed()
         if keys[self.rotate_left]:
-            self._rotate_angle(-1)
+            self.rotate_angle(-1)
         if keys[self.rotate_right]:
-            self._rotate_angle(1)
+            self.rotate_angle(1)
         if keys[self.boost]:
             self._accelerate()
             self.boosting = True
         if not keys[self.boost]:
             self.boosting = False
 
-    def _draw_bullets(self, screen: pygame.Surface):
+    def _draw_bullets_remaining(self, screen: pygame.Surface):
         for bullet_available in range(self.MAX_BULLETS - len(self.bullets)):
             pos = pygame.Vector2(screen.get_width() / 25 + 10 * bullet_available, screen.get_height() / 6)
             pygame.draw.circle(screen, "red", pos, 2)
@@ -142,7 +154,7 @@ class Player:
             self.move_sound.play()
 
     
-    def _rotate_angle(self, direction): # direction in [-1, 1]
+    def rotate_angle(self, direction): # direction in [-1, 1]
         self.angle = (self.angle + direction * self.ROTATIONAL_SPEED) % 360
 
     

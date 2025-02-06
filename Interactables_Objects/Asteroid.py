@@ -35,13 +35,9 @@ class Asteroid:
                 self.position = pygame.Vector2(random.randrange(0, screen.get_width()), random.randrange(0, screen.get_height()))
                 self.x_vel = self._generate_random_speed() * random.choice(sign)
             else:
-                comes_from_left = random.choice([True,False])
-                if comes_from_left:
-                    self.position = pygame.Vector2(0, random.randrange(0, screen.get_height()))
-                    self.x_vel = self._generate_random_speed()
-                else:
-                    self.position = pygame.Vector2(screen.get_width(), random.randrange(0, screen.get_height()))
-                    self.x_vel = 0 - self._generate_random_speed()
+                # Spawn at either side of the screen
+                self.position = pygame.Vector2(0, random.randrange(0, screen.get_height()))
+                self.x_vel = self._generate_random_speed() * random.choice([-1,1])
             
         self.y_vel = self._generate_random_speed() * random.choice(sign)
 
@@ -65,7 +61,10 @@ class Asteroid:
         return ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED)
     
     def tick(self, player_pos: pygame.Vector2 = None):
-
+        self.update(player_pos)
+        self.render()
+    
+    def update(self, player_pos: pygame.Vector2 = None):
         # Gravitational pull of player on asteroid
         if player_pos:
             distance = player_pos.distance_to(self.position)
@@ -80,6 +79,7 @@ class Asteroid:
         self.position.x = (self.position.x + self.x_vel * self.SPEED_SCALAR) % self.screen.get_width()
         self.position.y = (self.position.y + self.y_vel * self.SPEED_SCALAR) % self.screen.get_height()
         
+    def render(self):
         # Draw asteroid
         pygame.draw.circle(self.screen, "black", self.position, self.size * self.BOUNDARY_SCALAR)
         for v in range(len(self.vertices)):

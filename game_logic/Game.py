@@ -51,8 +51,8 @@ class Game:
         # Initiate Background Aesthetics
         self.background_asteroids: List[Asteroid] = [Asteroid(self.screen, random.choice([s for s in SizeType]), background=True) for _ in range(self.num_background_asteroids)]
         
-        self.score = Score()
-        self.lives = Lives(self.initial_player_lives)
+        self.score = Score(self.screen)
+        self.lives = Lives(self.screen, self.initial_player_lives)
         self.clock = pygame.time.Clock()
         self.game_tick = 0
         self.win = False
@@ -72,16 +72,13 @@ class Game:
         pygame.mixer.Channel(0).play(self.background_music, loops=1000)
         game_continues  = True
         while game_continues:
-            game_continues = self._tick()
+            game_continues = self._update_game()
+            self.render_game()
         return self._run_post_game()
     
 
     # Returns True if the game is still going, False otherwise
-    def _tick(self):
-        # limits FPS to 60
-        self.clock.tick(self.fps)
-        self.game_tick += 1
-
+    def _update_game(self):
         shooting = False
         # Game events (user-input and more)
         # pygame.QUIT - user clicked X to close your window
@@ -92,7 +89,11 @@ class Game:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 self.score.bullet_fired()
                 shooting = True
-        
+
+        # limits FPS to 60
+        self.clock.tick(self.fps)
+        self.game_tick += 1
+
         # No asteroids left in Game
         if len(self.asteroids) == 0: 
             self._win()
@@ -110,35 +111,52 @@ class Game:
         
         self._handle_bullet_collisions()
 
-        # fill the screen with a color to wipe away anything from last frame
-        self.screen.fill("black")
-        # Aesthetics only
-        [background_asteroid.tick() for background_asteroid in self.background_asteroids]
-        # Score
-        score_x_loc = self.screen_width / 25
-        score_y_loc = self.screen_height / 20
-        self.score.tick(self.screen, score_x_loc, score_y_loc)
+         # Aesthetics only
+        [background_asteroid.update() for background_asteroid in self.background_asteroids]
 
         # Player and bullets
-        self.player.tick()
+        self.player.update()
         self.player.receive_commands(shooting=shooting)
 
-        # Lives
-        self.lives.tick(self.screen)
-
-         # Asteroids
-        [asteroid.tick(player_pos=self.player.position) for asteroid in self.asteroids]
-        
         # Spawn new asteroid
         if (self.game_tick / self.fps) % self.asteroid_spawn_rate_seconds == 0.0:
-            # Find spawn point not near player
             new_asteroid = Asteroid(self.screen, random.choice(ASTEROID_ORDERED_SIZES[:-1]), is_in_game_spawn=True, debugging_mode=self.debugging_mode)
             self.asteroids.append(new_asteroid)
 
-        # flip() the display
-        pygame.display.flip()
+        # Asteroids
+        [asteroid.update(player_pos=self.player.position) for asteroid in self.asteroids]
+
+        # Score
+        self.score.update()
 
         return True
+    
+
+    def render_game(self):
+        # fill the screen with a color to wipe away anything from last frame
+        self.screen.fill("black")
+
+        # Aesthetics only
+        [background_asteroid.render() for background_asteroid in self.background_asteroids]
+
+        # Player and bullets
+        self.player.render()
+
+        # Lives
+        self.lives.render()
+
+        # Score
+        # Score
+        score_x_loc = self.screen_width / 25
+        score_y_loc = self.screen_height / 20
+        self.score.render(score_x_loc, score_y_loc)
+
+        # Asteroids
+        [asteroid.render() for asteroid in self.asteroids]
+
+        # flip() the display
+        pygame.display.flip()
+        
 
 
     def _run_post_game(self):
@@ -161,12 +179,15 @@ class Game:
         
         running = True
         while running == True: # running: [True, False, "quit"]
-            running = self._tick_post_game(size, font_play_again, status_surface, channel)
+            running = self._update_post_game(channel)
+            self._render_post_game(size, font_play_again, status_surface)
 
         return running != "quit"
-
     
-    def _tick_post_game(self, size, font_play_again, status_surface, sound_channel):
+    def _update_post_game(self, sound_channel):
+        # limits FPS to 60
+        self.clock.tick(self.fps)
+
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
@@ -175,36 +196,51 @@ class Game:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.mixer.Channel(sound_channel).stop()
                 return False
+            
+        # Background Aesthetics
+        [background_asteroid.update() for background_asteroid in self.background_asteroids] 
+
+        # Update rest of (inactive) game
+        if not self.win:
+            self.player.rotate_angle(1)
+        else:
+            self.player.receive_commands(shooting=False) 
+        self.player.update()
+        
+        # Asteorids
+        [asteroid.update(player_pos=self.player.position) for asteroid in self.asteroids]
+
+        return True
+    
+
+    def _render_post_game(self, size, font_play_again, status_surface):
         # fill the screen with a color to wipe away anything from last frame
         self.screen.fill("black")
         # Draw background asteroids before text
-        [background_asteroid.tick() for background_asteroid in self.background_asteroids]
+        [background_asteroid.render() for background_asteroid in self.background_asteroids]
 
+        # Win / Lose text
         self.screen.blit(status_surface, (self.screen_width / 2 - size * 2, self.screen_height / 2 - size))
 
+        # Draw Score
         score_x_loc = self.screen_width / 2 - 50
         score_y_loc = self.screen_height / 2
-        self.score.tick(self.screen, score_x_loc, score_y_loc, size=150, count=False)
+        self.score.render(score_x_loc, score_y_loc, size=150)  
 
+        # Play Again text
         play_again_surface = font_play_again.render("Click to Play Again", False, (100, 100, 100))
         self.screen.blit(play_again_surface, (self.screen_width / 2 - size, self.screen_height * 4 / 5 - size))
+        
+        # Player
+        self.player.render(active_game=False)
 
-        # Draw rest of (inactive) game
-        self.player.tick(active_game=False)
-        if not self.win:
-            self.player._rotate_angle(1)
-        else:
-            self.player.receive_commands(shooting=False)
-
-        [asteroid.tick(player_pos=self.player.position) for asteroid in self.asteroids]
+        # Asteroids
+        [asteroid.render() for asteroid in self.asteroids]
 
         # flip() the display to put your work on screen
         pygame.display.flip()
 
-        # limits FPS to 60
-        self.clock.tick(60) / 1000
 
-        return True
         
     def _player_collision_detected(self):
         if not self.player.invincible:
