@@ -79,12 +79,9 @@ class Player:
                 self.show = True
         
 
-    def render(self, active_game=True):
+    def render(self):
         # Draw bullets
         [bullet.render() for bullet in self.bullets]
-
-        # Draw lives
-        self.lives.render()
         
         # Draw player according to the angular orientation of Player
         updated_player_shape = list()
@@ -105,9 +102,6 @@ class Player:
                 updated_boost_shape.append((rotated_boost_x, rotated_boost_y))
         
             pygame.draw.polygon(self.screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_boost_shape], 2)
-        
-        if active_game:
-            self._draw_bullets_remaining(self.screen)
 
         if self.debugging_mode:
             pygame.draw.circle(self.screen, "white", self.position, self.scaled_bound_radius, width=1)
@@ -134,10 +128,10 @@ class Player:
             self.bullets.append(bullet)
             self.bullet_sound.play()
 
-    def _draw_bullets_remaining(self, screen: pygame.Surface):
+    def draw_bullets_remaining(self):
         for bullet_available in range(self.MAX_BULLETS - len(self.bullets)):
-            pos = pygame.Vector2(screen.get_width() / 25 + 10 * bullet_available, screen.get_height() / 6 + self.id * 75)
-            pygame.draw.circle(screen, "red", pos, 2)
+            pos = pygame.Vector2(self.screen.get_width() / 25 + 10 * bullet_available, self.screen.get_height() / 6 + self.id * 75)
+            pygame.draw.circle(self.screen, "red", pos, 2)
 
     def _angle_in_radians(self):
         return math.pi * self.angle / 180

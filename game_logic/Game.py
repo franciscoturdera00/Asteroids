@@ -160,7 +160,6 @@ class Game:
         # Player and bullets
         for player in self.players:
             player.render()
-            player.lives.render()
 
         # Score
         score_x_loc = self.screen_width / 25
@@ -169,6 +168,11 @@ class Game:
 
         # Asteroids
         [asteroid.render() for asteroid in self.asteroids]
+
+        # Draw bullets remaining and lives
+        for player in self.players:
+            player.draw_bullets_remaining()
+            player.lives.render()
 
         # flip() the display
         pygame.display.flip()
@@ -251,7 +255,7 @@ class Game:
         
         # Player
         for player in self.players:
-            player.render(active_game=False)
+            player.render()
 
         # Asteroids
         [asteroid.render() for asteroid in self.asteroids]
