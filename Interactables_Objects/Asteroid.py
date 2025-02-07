@@ -6,9 +6,9 @@ import pygame
 
 
 class SizeType(IntEnum):
-    LARGE=50
-    MEDIUM=30
-    SMALL=10
+    LARGE=60
+    MEDIUM=40
+    SMALL=15
 
 ASTEROID_ORDERED_SIZES = [SizeType.LARGE, SizeType.MEDIUM, SizeType.SMALL, None]
 SCALE_BACKGROUND_AESTHETIC_ASTEROIDS = 0.3
