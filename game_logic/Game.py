@@ -7,7 +7,6 @@ import pygame
 
 from Interactables_Objects.Asteroid import ASTEROID_ORDERED_SIZES, Asteroid, SizeType
 from Interactables_Objects.Player import Player
-from game_logic.Lives import Lives
 from game_logic.Score import Score
 
 # Asteroids Game
