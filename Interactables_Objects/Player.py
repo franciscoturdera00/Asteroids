@@ -18,7 +18,7 @@ class Player:
     BOUNDS_RADIUS = 18
     BOOST_SHOW_PERCENTAGE = 0.8
     MAX_BULLETS = 10
-    INVINSIBLES_SECONDS = 2
+    INVINCIBLE_SECONDS = 2
     STARTING_LIVES = 3
 
     def __init__(self, id, screen: pygame.Surface, position: pygame.Vector2, 
@@ -46,7 +46,7 @@ class Player:
         self.boosting = False
         self.bullets: List[Bullet] = list()
         self.invincible = True
-        self.invincible_frames = fps * self.INVINSIBLES_SECONDS
+        self.invincible_frames = fps * self.INVINCIBLE_SECONDS
         self.show = True
         self.fps = fps
         
@@ -160,6 +160,6 @@ class Player:
         self.velocity = [0,0]
         if invincible:
             self.invincible = True
-            self.invincible_frames = self.fps * self.INVINSIBLES_SECONDS
+            self.invincible_frames = self.fps * self.INVINCIBLE_SECONDS
 
 

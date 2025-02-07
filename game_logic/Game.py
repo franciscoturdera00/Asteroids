@@ -161,13 +161,13 @@ class Game:
         for player in self.players:
             player.render()
 
+        # Asteroids
+        [asteroid.render() for asteroid in self.asteroids]
+
         # Score
         score_x_loc = self.screen_width / 25
         score_y_loc = self.screen_height / 20
         self.score.render(score_x_loc, score_y_loc)
-
-        # Asteroids
-        [asteroid.render() for asteroid in self.asteroids]
 
         # Draw bullets remaining and lives
         for player in self.players:
