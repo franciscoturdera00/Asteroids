@@ -160,6 +160,7 @@ class Game:
         # Player and bullets
         for player in self.players:
             player.render()
+            [bullet.render() for bullet in player.bullets]
 
         # Asteroids
         [asteroid.render() for asteroid in self.asteroids]

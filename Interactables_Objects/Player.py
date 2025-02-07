@@ -80,9 +80,6 @@ class Player:
         
 
     def render(self):
-        # Draw bullets
-        [bullet.render() for bullet in self.bullets]
-        
         # Draw player according to the angular orientation of Player
         updated_player_shape = list()
         for point in self.player_shape:
