@@ -13,7 +13,7 @@ from game_logic.Score import Score
 class Player:
 
     ACCELERATION = 0.1
-    ROTATIONAL_SPEED = 10
+    ROTATIONAL_SPEED = 5
     MAX_SPEED = 5
     BOUNDS_RADIUS = 18
     BOOST_SHOW_PERCENTAGE = 0.8

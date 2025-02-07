@@ -20,16 +20,16 @@ class Game:
         self.screen=screen
         self.screen_width=screen.get_width()
         self.screen_height=screen.get_height()
-        self.fps=30
+        self.fps=45
 
         self.num_background_asteroids=300
-        self.asteroid_spawn_rate_seconds=7
         self.initial_asteroid_number=7
+        # self.asteroid_spawn_rate_seconds_per_player=7
+        
 
         self.initial_player_lives=3
         self.intial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]
-        self.intial_player_position = pygame.Vector2(self.screen_width / 2, self.screen_height / 2)
-        
+        self.asteroid_spawn_rate_seconds_per_player = math.ceil(7 / len(self.intial_players_positions))
    
         sounds = self._soundify("Sounds/background_game_music.wav",
                                 "Sounds/player_hit_sound.wav", 
@@ -136,7 +136,7 @@ class Game:
                 player.receive_commands()
 
         # Spawn new asteroid
-        if (self.game_tick / self.fps) % self.asteroid_spawn_rate_seconds == 0.0:
+        if (self.game_tick / self.fps) % self.asteroid_spawn_rate_seconds_per_player == 0.0:
             new_asteroid = Asteroid(self.screen, random.choice(ASTEROID_ORDERED_SIZES[:-1]), is_in_game_spawn=True, debugging_mode=self.debugging_mode)
             self.asteroids.append(new_asteroid)
 
@@ -279,39 +279,39 @@ class Game:
         self.win = True
     
     def _handle_bullet_collisions(self):
-        bullets = [bullet for player in self.players for bullet in player.bullets]
-        for bullet_index, bullet in enumerate(bullets):
-            for asteroid_index, asteroid in enumerate(self.asteroids):
-                actual_distance = bullet.position.distance_to(asteroid.position)
-                min_distance = bullet.RADIUS + asteroid.boundary_radius
+        for player in self.players:
+            for bullet_index, bullet in enumerate(player.bullets):
+                for asteroid_index, asteroid in enumerate(self.asteroids):
+                    actual_distance = bullet.position.distance_to(asteroid.position)
+                    min_distance = bullet.RADIUS + asteroid.boundary_radius
 
-                if actual_distance <= min_distance:
-                    # Update score
-                    self.score.asteroid_hit(asteroid.size)
+                    if actual_distance <= min_distance:
+                        # Update score
+                        self.score.asteroid_hit(asteroid.size)
 
-                    # Update bullets
-                    if bullet in bullets:
-                        bullets.remove(bullet)
+                        # Update bullets
+                        if bullet in player.bullets:
+                            player.bullets.remove(bullet)
 
-                    # Update asteroids
-                    self.asteroids.remove(asteroid)
-                    new_type = ASTEROID_ORDERED_SIZES[ASTEROID_ORDERED_SIZES.index(SizeType(asteroid.size)) + 1]
-                    if new_type is not None:
-                        for _ in range(2):
-                            new_ast = Asteroid(self.screen, new_type, deepcopy(asteroid.position), debugging_mode=self.debugging_mode)
-                            self.asteroids.append(new_ast)
-                    
-                    # Play asteroid explosion sound
-                    if asteroid.size == SizeType.LARGE.value:
-                        self.explosion_sounds_big_to_small[0].play()
-                    elif asteroid.size == SizeType.MEDIUM.value:
-                        self.explosion_sounds_big_to_small[1].play()
-                    elif asteroid.size == SizeType.SMALL.value:
-                        self.explosion_sounds_big_to_small[2].play()
+                        # Update asteroids
+                        self.asteroids.remove(asteroid)
+                        new_type = ASTEROID_ORDERED_SIZES[ASTEROID_ORDERED_SIZES.index(SizeType(asteroid.size)) + 1]
+                        if new_type is not None:
+                            for _ in range(2):
+                                new_ast = Asteroid(self.screen, new_type, deepcopy(asteroid.position), debugging_mode=self.debugging_mode)
+                                self.asteroids.append(new_ast)
+                        
+                        # Play asteroid explosion sound
+                        if asteroid.size == SizeType.LARGE.value:
+                            self.explosion_sounds_big_to_small[0].play()
+                        elif asteroid.size == SizeType.MEDIUM.value:
+                            self.explosion_sounds_big_to_small[1].play()
+                        elif asteroid.size == SizeType.SMALL.value:
+                            self.explosion_sounds_big_to_small[2].play()
 
-                if asteroid_index >= len(self.asteroids):
+                    if asteroid_index >= len(self.asteroids):
+                        break
+                if bullet_index >= len(player.bullets):
                     break
-            if bullet_index >= len(bullets):
-                break
 
         
