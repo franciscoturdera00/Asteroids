@@ -119,10 +119,8 @@ class Game:
                 self.score.player_hit()
                 pygame.mixer.Channel(6).play(self.player_hit_sound)
                 dead = player.lives.die()
-                # if dead:
-                #     return False
                 if not dead:
-                    player.restart_position(self.screen, invincible=True)
+                    player.restart_position(invincible=True)
         all_dead = all([player.is_dead() for player in self.players])
         if all_dead:
             return False
@@ -165,7 +163,6 @@ class Game:
             player.lives.render()
 
         # Score
-        # Score
         score_x_loc = self.screen_width / 25
         score_y_loc = self.screen_height / 20
         self.score.render(score_x_loc, score_y_loc)
@@ -175,7 +172,6 @@ class Game:
 
         # flip() the display
         pygame.display.flip()
-        
 
 
     def _run_post_game(self):

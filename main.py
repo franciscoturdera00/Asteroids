@@ -3,7 +3,8 @@ import pygame
 from game_logic.Game import Game
 
 def main():
-    # Adding optional argument
+    # Optional Arguments
+    # --p2: 2-Player Mode
     parser = argparse.ArgumentParser()
     parser.add_argument("--p2", help = "Two Player Mode", action='store_true')
     args = parser.parse_args()

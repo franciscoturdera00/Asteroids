@@ -161,8 +161,8 @@ class Player:
         self.angle = (self.angle + direction * self.ROTATIONAL_SPEED) % 360
 
     
-    def restart_position(self, screen, invincible=False):
-        self.position = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+    def restart_position(self, invincible=False):
+        self.position = pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
         self.velocity = [0,0]
         if invincible:
             self.invincible = True
