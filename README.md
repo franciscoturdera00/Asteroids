@@ -19,4 +19,6 @@ pip install pygame
 
 #### Run Game
 ```
-python main.py
+python main.py [--p2]
+```
+--p2: Two Player

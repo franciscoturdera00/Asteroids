@@ -14,7 +14,7 @@ from game_logic.Score import Score
 # Create your own challenge (will pull settings from config file)
 class Game:
 
-    def __init__(self, screen: pygame.Surface, debugging_mode=False):
+    def __init__(self, screen: pygame.Surface, two_player=False, debugging_mode=False):
         # Default game settings
         # TODO: Import from config file
         self.screen=screen
@@ -28,7 +28,10 @@ class Game:
         
 
         self.initial_player_lives=3
-        self.intial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]
+        if two_player:
+            self.intial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]
+        else:
+            self.intial_players_positions = [(-self.screen_width / 2, self.screen_height / 2)]
         self.asteroid_spawn_rate_seconds_per_player = math.ceil(7 / len(self.intial_players_positions))
    
         sounds = self._soundify("Sounds/background_game_music.wav",
