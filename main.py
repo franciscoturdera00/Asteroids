@@ -1,4 +1,5 @@
 import argparse
+from typing import List, Tuple
 import pygame
 from game_logic.PreGame import PreGame
 from game_logic.Game import Game
@@ -30,6 +31,32 @@ def main():
     while running:
         game = Game(screen=screen, font_path=font_path, two_player=pre_game.multiplayer, debugging_mode=False)
         running = game.run()
+        update_high_score("test", game.score.score)
+
+
+def update_high_score(user, score, max_saved=15):
+    high_scores: List[Tuple[str,int]] = get_current_high_scores()
+    high_scores.append((user, score))
+    high_scores = sorted(high_scores, key=lambda score: score[1], reverse=True)
+    high_scores = high_scores[:max_saved]
+    store_high_score(high_scores)
+
+def get_current_high_scores():
+    # Reading high score file
+    with open("shared_info/high_score") as file:
+        scores = list()
+        for line in file.readlines():
+            user, score = line.split("=")
+            scores.append((user, int(score)))
+    return scores
+
+
+def store_high_score(scores:List[Tuple[str,int]]): # Ordered list
+    # Writing high score file (overwrites existing content)
+    with open("shared_info/high_score", "w") as file:
+        for score in scores:
+            file.write(score[0] + "=" + str(score[1]) + "\n")
+
 
 
 if __name__ == "__main__":
