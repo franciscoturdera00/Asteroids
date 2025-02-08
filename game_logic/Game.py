@@ -13,9 +13,10 @@ from game_logic.Score import Score
 # Create your own challenge (will pull settings from config file)
 class Game:
 
-    def __init__(self, screen: pygame.Surface, two_player=False, debugging_mode=False):
+    def __init__(self, screen: pygame.Surface, font_path, two_player=False, debugging_mode=False):
         # Default game settings
         # TODO: Import from config file
+        self.font_path = font_path
         self.screen=screen
         self.screen_width=screen.get_width()
         self.screen_height=screen.get_height()
@@ -50,7 +51,7 @@ class Game:
         # Initiate Background Aesthetics
         self.background_asteroids: List[Asteroid] = [Asteroid(self.screen, random.choice([s for s in SizeType]), background=True) for _ in range(self.num_background_asteroids)]
         
-        self.score = Score(self.screen)
+        self.score = Score(self.screen, self.font_path)
         self.clock = pygame.time.Clock()
         self.game_tick = 0
         self.win = False
@@ -63,8 +64,8 @@ class Game:
 
         if len(self.intial_players_positions) == 2:
             player_2_initial_position =- pygame.Vector2(self.intial_players_positions[1][0], self.intial_players_positions[1][1])
-            player2 = Player(1, self.screen, player_2_initial_position,  fps=self.fps, color="blue",
-                             thrust_button=pygame.K_i, rotate_left_button=pygame.K_j, rotate_right_button=pygame.K_l, shoot_button=pygame.K_p,
+            player2 = Player(1, self.screen, player_2_initial_position,  fps=self.fps, color="purple",
+                             thrust_button=pygame.K_i, rotate_left_button=pygame.K_j, rotate_right_button=pygame.K_l, shoot_button=pygame.K_RSHIFT,
                              debugging_mode=self.debugging_mode)
             self.players.append(player2)
 
@@ -77,7 +78,7 @@ class Game:
     # Returns True if player wants to play again
     def run(self):
         #Background music
-        pygame.mixer.Channel(0).play(self.background_music, loops=1000)
+        # pygame.mixer.Channel(0).play(self.background_music, loops=1000)
         game_continues  = True
         while game_continues:
             game_continues = self._update_game()
@@ -178,8 +179,8 @@ class Game:
 
     def _run_post_game(self):
         size = 100
-        font_title = pygame.font.SysFont('Smooch Sans', size, bold=True)
-        font_play_again = pygame.font.SysFont('Smooch Sans', math.ceil(size / 2))
+        font_title = pygame.font.Font(self.font_path, size)
+        font_play_again = pygame.font.Font(self.font_path, math.ceil(size / 2))
  
         boo = pygame.mixer.Sound("Sounds/booing_sound.wav")
         cheer = pygame.mixer.Sound("Sounds/applause.wav")
@@ -240,16 +241,17 @@ class Game:
         [background_asteroid.render() for background_asteroid in self.background_asteroids]
 
         # Win / Lose text
-        self.screen.blit(status_surface, (self.screen_width / 2 - size * 2, self.screen_height / 2 - size))
+        self.screen.blit(status_surface, (self.screen_width / 2 - size * 3, self.screen_height / 3 - size))
 
         # Draw Score
-        score_x_loc = self.screen_width / 2 - 50
+        size = 150
+        score_x_loc = self.screen_width / 2 - size
         score_y_loc = self.screen_height / 2
-        self.score.render(score_x_loc, score_y_loc, size=150)  
+        self.score.render(score_x_loc, score_y_loc, size=size)  
 
         # Play Again text
         play_again_surface = font_play_again.render("Click to Play Again", False, (100, 100, 100))
-        self.screen.blit(play_again_surface, (self.screen_width / 2 - size, self.screen_height * 4 / 5 - size))
+        self.screen.blit(play_again_surface, (self.screen_width / 2 - size * 2, self.screen_height * 4 / 5 - size / 2))
         
         # Player
         for player in self.players:
@@ -277,6 +279,7 @@ class Game:
         return [pygame.mixer.Sound(file) for file in file_paths]
     
     def _win(self):
+        self.score.win(sum([player.lives.number for player in self.players]))
         self.win = True
     
     def _handle_bullet_collisions(self):

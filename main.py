@@ -1,5 +1,6 @@
 import argparse
 import pygame
+from game_logic.PreGame import PreGame
 from game_logic.Game import Game
 
 def main():
@@ -19,9 +20,13 @@ def main():
     # Start Game
     screen_width = 1400
     screen_height = 900
+    screen = pygame.display.set_mode((screen_width, screen_height))
+    font_path = "Fonts/novem.ttf"
     running = True
+    pre_game = PreGame(screen, font_path=font_path)
+    pre_game.run()
     while running:
-        game = Game(screen = pygame.display.set_mode((screen_width, screen_height)), two_player=two_player, debugging_mode=False)
+        game = Game(screen=screen, font_path=font_path, two_player=pre_game.multiplayer, debugging_mode=False)
         running = game.run()
 
 
