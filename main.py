@@ -4,12 +4,14 @@ from game_logic.PreGame import PreGame
 from game_logic.Game import Game
 
 def main():
+    # Old way of doing 2-player
+    # Leaving in case of decoupling game screens
     # Optional Arguments
     # --p2: 2-Player Mode
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--p2", help = "Two Player Mode", action='store_true')
-    args = parser.parse_args()
-    two_player = args.p2
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--p2", help = "Two Player Mode", action='store_true')
+    # args = parser.parse_args()
+    # two_player = args.p2
 
     # Initilalize game dev lib
     pygame.init()
