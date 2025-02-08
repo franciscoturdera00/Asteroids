@@ -69,7 +69,8 @@ class Game:
         if len(self.intial_players_positions) == 2:
             player_2_initial_position =- pygame.Vector2(self.intial_players_positions[1][0], self.intial_players_positions[1][1])
             player2 = Player(1, self.screen, player_2_initial_position,  fps=self.fps, color="purple",
-                             thrust_button=pygame.K_i, rotate_left_button=pygame.K_j, rotate_right_button=pygame.K_l, shoot_button=pygame.K_RSHIFT,
+                             thrust_button=[pygame.K_i, pygame.K_UP], rotate_left_button=[pygame.K_j, pygame.K_LEFT], rotate_right_button=[pygame.K_l, pygame.K_RIGHT], 
+                             shoot_button=[pygame.K_RSHIFT],
                              debugging_mode=self.debugging_mode)
             self.players.append(player2)
 
@@ -100,7 +101,7 @@ class Game:
             if event.type == pygame.QUIT:
                 return False
             for player in self.players:
-                if not player.is_dead() and event.type == pygame.KEYDOWN and event.key == player.shoot:
+                if not player.is_dead() and event.type == pygame.KEYDOWN and event.key in player.shoot:
                     self.score.bullet_fired()
                     player.shoot_bullet()
 
@@ -244,6 +245,10 @@ class Game:
             else:
                 player.receive_commands() 
             player.update()
+
+        # Alien
+        for alien in self.aliens:
+            alien.update([player.position for player in self.players])
         
         # Asteorids
         [asteroid.update(players_pos=[player.position for player in self.players]) for asteroid in self.asteroids]
@@ -273,6 +278,10 @@ class Game:
         # Player
         for player in self.players:
             player.render()
+
+        # Aliens
+        for alien in self.aliens:
+            alien.render()
 
         # Asteroids
         [asteroid.render() for asteroid in self.asteroids]

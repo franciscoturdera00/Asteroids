@@ -24,7 +24,7 @@ class Alien:
         self.freeze_timer = self.fps * self.freeze_time_seconds
         self.hitbox_radius = self.size * self.HITBOX_SCALE
         self.goal = self._generate_random_point_within_square(self.position, 150)
-        self.velocity = self._generate_velocity_to_goal(6)
+        self.velocity = self._generate_velocity_to_goal(1)
 
         self.debugging_mode=debugging_mode
 
@@ -57,6 +57,8 @@ class Alien:
     
 
     def _render_shape(self):
+        pygame.draw.ellipse(self.screen, "black", pygame.Rect(self.position.x - self.size, self.position.y - self.size / 2, self.size * 2, self.size), 0)
+        pygame.draw.line(self.screen, "green", pygame.Vector2(self.position.x, self.position.y - self.size / 2), pygame.Vector2(self.position.x, self.position.y - self.size + 5), 5)
         pygame.draw.ellipse(self.screen, self.color, pygame.Rect(self.position.x - self.size, self.position.y - self.size / 2, self.size * 2, self.size), 1)
         pygame.draw.ellipse(self.screen, self.color, pygame.Rect(self.position.x - self.size, self.position.y - self.size / 8, self.size * 2, self.size / 4), 0)
         pygame.draw.arc(self.screen, self.color, pygame.Rect(self.position.x - self.size / 2, self.position.y - self.size, self.size, self.size), 0, math.pi, 1)
@@ -78,6 +80,7 @@ class Alien:
 
     
     def _move_towards_goal(self):
+        # LOOK INTO self.position.movetowards(Vector2)
         self.position.x = (self.position.x + self.velocity.x) % (self.screen.get_width() + 10)
         self.position.y = (self.position.y + self.velocity.y) % (self.screen.get_height() + 10)
 
@@ -87,5 +90,5 @@ class Alien:
         self.position.y += 0.1 * sign()
         
 
-    def _random_time_frame(self, min=2, max=6):
+    def _random_time_frame(self, min=2, max=4):
         return random.randint(min, max)

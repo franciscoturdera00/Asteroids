@@ -9,10 +9,8 @@ import pygame
 
 from Interactables_Objects.Asteroid import Asteroid, SizeType
 
-
 class PreGame:
 
-    
     def __init__(self, screen: pygame.Surface, font_path):
         self.background_music = pygame.mixer.Sound("Sounds/background_game_music.wav")
         self.screen = screen
@@ -28,7 +26,8 @@ class PreGame:
 
     def run(self):
         #Background music
-        pygame.mixer.Channel(0).play(self.background_music, loops=1000)
+        pygame.mixer.Channel(0).set_volume(0.7)
+        pygame.mixer.Channel(0).play(self.background_music, loops=10000)
 
         font_size = 200
         font_title = pygame.font.Font(self.font_path, font_size)

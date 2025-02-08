@@ -23,7 +23,7 @@ class Player:
 
     def __init__(self, id, screen: pygame.Surface, position: pygame.Vector2, 
                  fps=60, scale=0.5, starting_angle=0, color="white", 
-                 thrust_button=pygame.K_w, rotate_left_button=pygame.K_a, rotate_right_button=pygame.K_d, shoot_button=pygame.K_SPACE,
+                 thrust_button=[pygame.K_w], rotate_left_button=[pygame.K_a], rotate_right_button=[pygame.K_d], shoot_button=[pygame.K_SPACE],
                  debugging_mode=False):
         self.id = id
         self.screen = screen
@@ -109,14 +109,14 @@ class Player:
 
     def receive_commands(self):
         keys = pygame.key.get_pressed()
-        if keys[self.rotate_left]:
+        if any(keys[rotate_left] for rotate_left in self.rotate_left):
             self.rotate_angle(-1)
-        if keys[self.rotate_right]:
+        if any(keys[rotate_right] for rotate_right in self.rotate_right):
             self.rotate_angle(1)
-        if keys[self.boost]:
+        if any(keys[boost] for boost in self.boost):
             self._accelerate()
             self.boosting = True
-        if not keys[self.boost]:
+        if not any(keys[boost] for boost in self.boost):
             self.boosting = False
 
     def shoot_bullet(self):
