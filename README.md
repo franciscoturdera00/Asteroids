@@ -1,24 +1,32 @@
 
 # Asteroids
 
-A recreation of the popular game [Asteroids](https://en.wikipedia.org/wiki/Asteroids_(video_game)) in `python3`
+A recreation of the popular game [Asteroids](https://en.wikipedia.org/wiki/Asteroids_(video_game)) with `pygame`
 
 
 ## Prerequisites:
 ```
 python 3.13.1 or later
-pygame 2.6.1 or later
 ```
 
-### On ~/.../Asteroids:
+## On ~/.../Asteroids:
 
-#### Install pygame
+### Recommended
+#### Create Virtual Environment:
 ```
-pip install pygame
+python -m venv .venv
+```
+Use `.venv/Scripts/python.exe` instead of `python` below.
+
+### Required
+
+#### Install requirements:
+
+```
+python -m pip install -r requirements.txt
 ```
 
-#### Run Game
+#### Run game:
 ```
-python main.py [--p2]
+python main.py
 ```
---p2: Two Player
