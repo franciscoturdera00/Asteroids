@@ -108,8 +108,7 @@ class Game:
         self.clock.tick(self.fps)
         self.game_tick += 1
 
-        # No asteroids left in Game
-        if len(self.asteroids) == 0: 
+        if self._players_have_won(): 
             self._win()
             return False
         
@@ -306,6 +305,9 @@ class Game:
         self.score.win(sum([player.lives.number for player in self.players]))
         self.win = True
 
+    def _players_have_won(self):
+        return len(self.asteroids) == 0 and len(self.aliens) == 0
+
     def _handle_bullet_collisions(self):
         self._handle_asteroid_bullet_collisions()
         self._handle_alien_bullet_collision()
@@ -338,6 +340,8 @@ class Game:
                 player.bullets.remove(bullet)
             # Remove alien
             self.aliens.remove(alien)
+
+            self._play_asteroid_sound(asteroid_size=SizeType.MEDIUM)
 
                     
     def _handle_thing_bullet_collisions(self, interactable_objects):
