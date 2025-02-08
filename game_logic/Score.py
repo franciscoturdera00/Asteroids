@@ -39,6 +39,9 @@ class Score:
     
     def asteroid_hit(self, size):
         self.score += size * 50 * self.MULTIPLIER
+
+    def alien_hit(self):
+        self.score += 2000 * self.MULTIPLIER
     
     def player_hit(self):
         self.score -= 700

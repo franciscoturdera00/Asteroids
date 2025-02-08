@@ -51,7 +51,7 @@ class Asteroid:
             self.x_vel *= 0.1
             self.y_vel *= 0.1
 
-        self.boundary_radius = self.size * self.BOUNDARY_SCALAR
+        self.hitbox_radius = self.size * self.BOUNDARY_SCALAR
         self.color = (R, G, B)
 
         self._create_vertices()

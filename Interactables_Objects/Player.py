@@ -30,7 +30,7 @@ class Player:
         self.position = position
         self.velocity = [0,0]
         self.scale = scale
-        self.scaled_bound_radius = self.BOUNDS_RADIUS * scale
+        self.hitbox_radius = self.BOUNDS_RADIUS * scale
         self.color = color
         self.angle = starting_angle
         self.lives = Lives(id, screen)
@@ -101,7 +101,7 @@ class Player:
             pygame.draw.polygon(self.screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_boost_shape], 2)
 
         if self.debugging_mode:
-            pygame.draw.circle(self.screen, "white", self.position, self.scaled_bound_radius, width=1)
+            pygame.draw.circle(self.screen, "white", self.position, self.hitbox_radius, width=1)
 
         
     def is_dead(self):
