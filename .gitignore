@@ -148,6 +148,7 @@ venv.bak/
 
 # Super Duper Secrets
 vm_info.txt
+shared_info
 
 # mypy
 .mypy_cache/
