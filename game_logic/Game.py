@@ -102,8 +102,7 @@ class Game:
                 return False
             for player in self.players:
                 if not player.is_dead() and event.type == pygame.KEYDOWN and event.key in player.shoot:
-                    self.score.bullet_fired()
-                    player.shoot_bullet()
+                    player.shoot_bullet(self.score)
 
         # limits FPS to 60
         self.clock.tick(self.fps)

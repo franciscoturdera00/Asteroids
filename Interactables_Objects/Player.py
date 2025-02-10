@@ -119,11 +119,12 @@ class Player:
         if not any(keys[boost] for boost in self.boost):
             self.boosting = False
 
-    def shoot_bullet(self):
+    def shoot_bullet(self, score: Score):
         if not self.invincible and len(self.bullets) < self.MAX_BULLETS:
             bullet = Bullet(self.screen, deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
             self.bullets.append(bullet)
             self.bullet_sound.play()
+            score.bullet_fired()
 
     def draw_bullets_remaining(self):
         for bullet_available in range(self.MAX_BULLETS - len(self.bullets)):
