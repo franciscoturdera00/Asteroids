@@ -120,7 +120,7 @@ class Player:
             self.boosting = False
 
     def shoot_bullet(self, score: Score):
-        if not self.invincible and len(self.bullets) < self.MAX_BULLETS:
+        if not self.is_dead() and not self.invincible and len(self.bullets) < self.MAX_BULLETS:
             bullet = Bullet(self.screen, deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
             self.bullets.append(bullet)
             self.bullet_sound.play()
