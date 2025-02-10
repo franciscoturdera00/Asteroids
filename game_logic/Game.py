@@ -30,7 +30,7 @@ class Game:
         if two_player:
             self.intial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]
         else:
-            self.intial_players_positions = [(-self.screen_width / 2, self.screen_height / 2)]\
+            self.intial_players_positions = [(-self.screen_width / 2, self.screen_height / 2)]
         
         # Rates depend on number of players
         self.asteroid_spawn_rate_seconds_per_player = math.ceil(7 / len(self.intial_players_positions))
