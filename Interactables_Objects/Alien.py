@@ -8,6 +8,7 @@ import pygame
 class Alien:
 
     HITBOX_SCALE = 5 / 6
+    position: pygame.Vector2
 
 
     def __init__(self, screen: pygame.Surface, fps, position: pygame.Vector2 = None, color = "white", size = 20, debugging_mode=False):
@@ -33,8 +34,8 @@ class Alien:
         if self.move:
             self._move_towards_goal()
             if self.position.distance_to(self.goal) <= 3:
-                self.goal = self._generate_random_point_within_square(player_position, 50)
-                self.velocity = self._generate_velocity_to_goal(self._random_time_frame())
+                # self.goal = self._generate_random_point_within_square(player_position, 50)
+                # self.velocity = self._generate_velocity_to_goal(self._random_time_frame())
                 self.move = False
         else:
             if self.freeze_timer > 0:

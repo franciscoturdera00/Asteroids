@@ -8,6 +8,7 @@ import pygame
 from Interactables_Objects.Alien import Alien
 from Interactables_Objects.Asteroid import ASTEROID_ORDERED_SIZES, Asteroid, SizeType
 from Interactables_Objects.Player import Player
+from Interactables_Objects.SmartAlien import SmartAlien
 from game_logic.Score import Score
 
 # Asteroids Game
@@ -79,6 +80,7 @@ class Game:
 
         # Intiate Aliens
         self.aliens: List[Alien] = list()
+        # self.aliens.append(SmartAlien(self.screen, self.players[0]))
         
     # Returns True if player wants to play again
     def run(self):
@@ -150,7 +152,8 @@ class Game:
 
         # Alien
         for alien in self.aliens:
-            alien.update([player.position for player in self.players])
+            positions = [player.position for player in self.players if not player.is_dead()]
+            alien.update(positions)
 
         # Asteroids
         [asteroid.update(players_pos=[player.position for player in self.players]) for asteroid in self.asteroids]
