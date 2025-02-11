@@ -12,12 +12,11 @@ from game_logic.Score import Score
 
 class Player:
 
-    ACCELERATION = 0.1
+    ACCELERATION = 0.075
     ROTATIONAL_SPEED = 5
     MAX_SPEED = 5
     BOUNDS_RADIUS = 18
     BOOST_SHOW_PERCENTAGE = 0.8
-    MAX_BULLETS = 10
     INVINCIBLE_SECONDS = 2
     STARTING_LIVES = 3
 
@@ -43,14 +42,17 @@ class Player:
         self.player_shape = [(24 * scale, 0), (-24 * scale, -18 * scale), (-18 * scale, 0), (-24 * scale,  18 * scale)]
         self.boost_shape = [(-18 * scale, 0), (-21 * scale, 9 * scale), (-32 * scale, 0 * scale), (-21 * scale, -9 * scale)]
 
-        self.boosting = False
-        self.bullets: List[Bullet] = list()
         self.invincible = True
         self.invincible_frames = fps * self.INVINCIBLE_SECONDS
         self.show = True
         self.fps = fps
+
+        self.max_bullets = 3
+        self.bullets: List[Bullet] = list()
         
+        self.boosting = False
         self.thrust_frame = 0
+
         self.bullet_sound = pygame.mixer.Sound("Sounds/fire.wav")
         self.move_sound = pygame.mixer.Sound("Sounds/thrust.wav")
 
@@ -120,14 +122,14 @@ class Player:
             self.boosting = False
 
     def shoot_bullet(self, score: Score):
-        if not self.is_dead() and not self.invincible and len(self.bullets) < self.MAX_BULLETS:
+        if not self.is_dead() and not self.invincible and len(self.bullets) < self.max_bullets:
             bullet = Bullet(self.screen, deepcopy(self.position), self._angle_in_radians(), fps=self.fps)
             self.bullets.append(bullet)
             self.bullet_sound.play()
             score.bullet_fired()
 
     def draw_bullets_remaining(self):
-        for bullet_available in range(self.MAX_BULLETS - len(self.bullets)):
+        for bullet_available in range(self.max_bullets - len(self.bullets)):
             pos = pygame.Vector2(self.screen.get_width() / 25 + 10 * bullet_available, self.screen.get_height() / 6 + self.id * 75)
             pygame.draw.circle(self.screen, "red", pos, 2)
 

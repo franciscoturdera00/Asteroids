@@ -61,10 +61,6 @@ class Asteroid:
     def _generate_random_speed(self):
         return ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED)
     
-    def tick(self, player_pos: pygame.Vector2 = None):
-        self.update(player_pos)
-        self.render()
-    
     def update(self, players_pos: List[pygame.Vector2] = list()):
         # Gravitational pull of player on asteroid
         for player_pos in players_pos:

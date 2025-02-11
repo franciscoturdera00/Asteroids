@@ -76,11 +76,11 @@ class PreGame:
 
         # 1 Player
         status_surface = font_play_type.render("[1] 1-Player [W,A,D,SPACE]", True, color)
-        self.screen.blit(status_surface, (self.screen.get_width() / 3 - size / 3 * 2.5, self.screen.get_height() / 2 - 2 * size / 3 + spacing * 2))
+        self.screen.blit(status_surface, (self.screen.get_width() / 5 - size / 3 * 2.5, self.screen.get_height() / 2 - 2 * size / 3 + spacing * 2))
 
         # 2 Player
-        status_surface = font_play_type.render("[2] 2-Player [I,J,L,R_SHIFT]", True, color)
-        self.screen.blit(status_surface, (self.screen.get_width() / 3 - size / 3 * 2.5, self.screen.get_height() / 2 - 2 * size / 3 + spacing * 2.5))
+        status_surface = font_play_type.render("[2] 2-Player [UP,LEFT,RIGHT,R_SHIFT]", True, color)
+        self.screen.blit(status_surface, (self.screen.get_width() / 5 - size / 3 * 2.5, self.screen.get_height() / 2 - 2 * size / 3 + spacing * 2.5))
 
         # flip() the display
         pygame.display.flip()

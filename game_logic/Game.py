@@ -7,6 +7,8 @@ import pygame
 
 from Interactables_Objects.Alien import Alien
 from Interactables_Objects.Asteroid import ASTEROID_ORDERED_SIZES, Asteroid, SizeType
+from Interactables_Objects.Items.Item import Item
+from Interactables_Objects.Items.PlusBulletItem import PlusBulletItem
 from Interactables_Objects.Player import Player
 from game_logic.Score import Score
 
@@ -26,6 +28,7 @@ class Game:
         self.num_background_asteroids=300
         self.initial_asteroid_number=7
         self.initial_player_lives=3
+        self.item_spawn_rate = .15
         
         if two_player:
             self.intial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]
@@ -79,6 +82,8 @@ class Game:
 
         # Intiate Aliens
         self.aliens: List[Alien] = list()
+
+        self.items: List[Item] = list()
         
     # Returns True if player wants to play again
     def run(self):
@@ -128,6 +133,7 @@ class Game:
             return False
         
         self._handle_bullet_collisions()
+        self._handle_item_player_collision()
 
          # Aesthetics only
         [background_asteroid.update() for background_asteroid in self.background_asteroids]
@@ -143,6 +149,9 @@ class Game:
             new_asteroid = Asteroid(self.screen, random.choice(ASTEROID_ORDERED_SIZES[:-1]), is_in_game_spawn=True, debugging_mode=self.debugging_mode)
             self.asteroids.append(new_asteroid)
         
+        # Asteroids
+        [asteroid.update(players_pos=[player.position for player in self.players]) for asteroid in self.asteroids]
+        
         # Spawn new Alien
         if (self.game_tick / self.fps) % self.alien_spawn_rate_seconds_per_player == 0.0:
             new_alien = Alien(self.screen, self.fps, debugging_mode=self.debugging_mode)
@@ -152,11 +161,17 @@ class Game:
         for alien in self.aliens:
             alien.update([player.position for player in self.players])
 
-        # Asteroids
-        [asteroid.update(players_pos=[player.position for player in self.players]) for asteroid in self.asteroids]
-
         # Score
         self.score.update()
+
+        # Remove item if time's up
+        for item in self.items:
+            if item.ticks_left <= 0:
+                self.items.remove(item)
+                break
+
+        # Items
+        [item.update() for item in self.items]
 
         return True
     
@@ -189,6 +204,9 @@ class Game:
         # Aliens
         for alien in self.aliens:
             alien.render()
+
+        for item in self.items:
+            item.render()
 
         # flip() the display
         pygame.display.flip()
@@ -315,28 +333,43 @@ class Game:
 
     def _players_have_won(self):
         return len(self.asteroids) == 0 and len(self.aliens) == 0
+    
+    def _handle_item_player_collision(self):
+        for player in self.players:
+            for item in self.items:
+                if item.position.distance_to(player.position) < (player.BOUNDS_RADIUS + (item.hitbox / 2)):
+                    item.perform_action(player=player)
+                    self.items.remove(item)
+                    break
+                
 
     def _handle_bullet_collisions(self):
         self._handle_asteroid_bullet_collisions()
         self._handle_alien_bullet_collision()
     
     def _handle_asteroid_bullet_collisions(self):
+        asteroid: Asteroid
         player, bullet, asteroid = self._handle_thing_bullet_collisions(self.asteroids)
         if asteroid:
             # Update score
             self.score.asteroid_hit(asteroid.size)
             # Update bullets
-            if bullet in player.bullets:
-                player.bullets.remove(bullet)
+            player.bullets.remove(bullet)
+
             # Update asteroids
             self.asteroids.remove(asteroid)
             new_type = ASTEROID_ORDERED_SIZES[ASTEROID_ORDERED_SIZES.index(SizeType(asteroid.size)) + 1]
+
+            self._play_asteroid_sound(asteroid_size=asteroid.size)
+
+            # New Asteroids - No new ones if asteroid is smallest
             if new_type is not None:
                 for _ in range(2):
                     new_ast = Asteroid(self.screen, new_type, deepcopy(asteroid.position), debugging_mode=self.debugging_mode)
                     self.asteroids.append(new_ast)
             
-            self._play_asteroid_sound(asteroid_size=asteroid.size)
+            self._spawn_item_with_chance(self.item_spawn_rate, asteroid)
+            
 
     def _handle_alien_bullet_collision(self):
         player, bullet, alien = self._handle_thing_bullet_collisions(self.aliens)
@@ -351,6 +384,12 @@ class Game:
 
             self._play_asteroid_sound(asteroid_size=SizeType.MEDIUM)
 
+            self._spawn_item_with_chance(self.item_spawn_rate * 3, alien)
+    
+    def _spawn_item_with_chance(self, spawn_rate, thing):
+        if random.random() < spawn_rate:
+            item = PlusBulletItem(self.screen, self.fps, thing.position.copy(), 5)
+            self.items.append(item)
                     
     def _handle_thing_bullet_collisions(self, interactable_objects):
         for player in self.players:
@@ -362,20 +401,6 @@ class Game:
                     if actual_distance <= min_distance:
                         return player, bullet, interactable_object
         return None, None, None
-                        # Update score
-                        # self.score.alien_hit()
-                    
-                #     # Update bullets
-                #     if bullet in player.bullets:
-                #         player.bullets.remove(bullet)
-                    
-                #     # Remove alien
-                #     self.aliens.remove(alien)
-
-                #     if alien_index >= len(self.aliens):
-                #         break
-                # if bullet_index >= len(player.bullets):
-                    #  break
                  
 
     def _play_asteroid_sound(self, asteroid_size):
