@@ -1,6 +1,6 @@
 
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, final, override
 import pygame
 
 from Interactables_Objects.Alien import Alien
@@ -25,10 +25,6 @@ class Item(ABC):
         self.show = True
 
         self.hitbox = size * self.HITBOX_SCALE
-        
-    @abstractmethod
-    def perform_action(self, score: Score = None, player: Player = None, asteroids: List[Asteroid] = None, aliens: List[Alien] = None):
-        raise NotImplementedError("Item must implement 'perform_action'")
     
     def update(self):   
         self.ticks_left -= 1
@@ -42,3 +38,32 @@ class Item(ABC):
         # self.screen.blit(self.repr, (pos_x, pos_y))
         raise NotImplementedError("Item must implement 'render'")
         # pygame.draw.circle(self.screen, "red", self.position, self.size)
+        
+    @final
+    def perform_action(self, score: Score = None, player: Player = None, asteroids: List[Asteroid] = None, aliens: List[Alien] = None):
+        # DO NOT MODIFY IN SUBCLASS
+        self.perform_Action_on_score(score)
+        self.perform_action_on_player(player)
+        self.perform_action_on_asteroids(asteroids)
+        self.perform_action_on_aliens(aliens)
+    
+    @override
+    def perform_action_on_player(self, player: Player):
+        # Modify this function in your Item subclass to perform an action on the player that picked up this item
+        return player
+
+    @override
+    def perform_action_on_asteroids(self, asteroids: List[Asteroid]):
+        # Modify this function in your Item subclass to perform an action on any/all interactable asteroids
+        return asteroids
+
+    @override
+    def perform_action_on_aliens(self, aliens: List[Alien]):
+        # Modify this function in your Item subclass to perform an action on any/all interactable aliens
+        return aliens
+
+    @override
+    def perform_Action_on_score(self, score: Score):
+        # Modify this function in your Item subclass to perform an action on the game score
+        return score
+    

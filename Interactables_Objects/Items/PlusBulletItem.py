@@ -16,8 +16,9 @@ class PlusBulletItem(Item):
         else:
             pygame.draw.circle(self.screen, "red", self.position, self.size * 0.75)
     
-    def perform_action(self, score: Score = None, player: Player = None, asteroids: List[Asteroid] = None, aliens: List[Alien] = None):
+    def perform_action_on_player(self, player):
         player.max_bullets += 1
+        return super().perform_action_on_player(player)
         
 
     
