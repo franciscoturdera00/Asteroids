@@ -11,7 +11,7 @@ from game_logic.Score import Score
 
 class Item(ABC):
 
-    ITEM_LIFETIME_SECONDS = 10
+    ITEM_LIFETIME_SECONDS = 15
     HITBOX_SCALE = 6 / 5
 
     def __init__(self, screen: pygame.Surface, fps, initial_location: pygame.Vector2, size, image_file_path="Images/something_wong.png"):

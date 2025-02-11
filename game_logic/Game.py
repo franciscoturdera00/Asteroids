@@ -29,7 +29,7 @@ class Game:
         self.num_background_asteroids=300
         self.initial_asteroid_number=7
         self.initial_player_lives=3
-        self.item_spawn_rate = 1 #.15
+        self.item_spawn_rate = .2
         
         if two_player:
             self.intial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]
@@ -408,7 +408,7 @@ class Game:
             all_items = bullet_item, nuke_item
 
             # Probabilities are normalized. Probability values should be considered relative to their sum
-            item_pobabilities = 5,5
+            item_pobabilities = 85, 15
             item_probabilities_norm = [float(prob)/sum(item_pobabilities) for prob in item_pobabilities]
             item = random.choices(all_items, weights=item_probabilities_norm)[0]
             self.items.append(item)

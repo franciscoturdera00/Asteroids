@@ -24,6 +24,10 @@ class BlackHoleItem(Item):
             eat_everything()
             return True
         return False
+    
+    def perform_action_on_score(self, score):
+        score.score += 15
+        return super().perform_action_on_score(score)
 
     def perform_action_on_aliens(self, aliens, play_sounds_function = None):
         if self.ticks_since_grabbed * self.PACE <= self.NUKE_RADIUS:
