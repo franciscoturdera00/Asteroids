@@ -7,6 +7,7 @@ import pygame
 
 from Interactables_Objects.Alien import Alien
 from Interactables_Objects.Asteroid import ASTEROID_ORDERED_SIZES, Asteroid, SizeType
+from Interactables_Objects.Items.ExtraLifeItem import ExtraLifeItem
 from Interactables_Objects.Items.Item import Item
 from Interactables_Objects.Items.BlackHoleItem import BlackHoleItem
 from Interactables_Objects.Items.PlusBulletItem import PlusBulletItem
@@ -405,10 +406,11 @@ class Game:
             item = None
             bullet_item = PlusBulletItem(self.screen, self.fps, position.copy(), 5)
             nuke_item = BlackHoleItem(self.screen, self.fps, position.copy(), 5)
-            all_items = bullet_item, nuke_item
+            extra_life_item = ExtraLifeItem(self.screen, self.fps, position.copy(), 5 )
+            all_items = bullet_item, nuke_item, extra_life_item
 
             # Probabilities are normalized. Probability values should be considered relative to their sum
-            item_pobabilities = 85, 15
+            item_pobabilities = 8, 1, 1
             item_probabilities_norm = [float(prob)/sum(item_pobabilities) for prob in item_pobabilities]
             item = random.choices(all_items, weights=item_probabilities_norm)[0]
             self.items.append(item)
