@@ -2,12 +2,13 @@
 from copy import deepcopy
 import math
 import random
-from typing import List
+from typing import Callable, List
 import pygame
 
 from Interactables_Objects.Alien import Alien
 from Interactables_Objects.Asteroid import ASTEROID_ORDERED_SIZES, Asteroid, SizeType
 from Interactables_Objects.Items.Item import Item
+from Interactables_Objects.Items.NukeItem import NukeItem
 from Interactables_Objects.Items.PlusBulletItem import PlusBulletItem
 from Interactables_Objects.Player import Player
 from game_logic.Score import Score
@@ -28,7 +29,7 @@ class Game:
         self.num_background_asteroids=300
         self.initial_asteroid_number=7
         self.initial_player_lives=3
-        self.item_spawn_rate = .15
+        self.item_spawn_rate = 1 #.15
         
         if two_player:
             self.intial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]
@@ -58,6 +59,8 @@ class Game:
         # Initiate Background Aesthetics
         self.background_asteroids: List[Asteroid] = [Asteroid(self.screen, random.choice([s for s in SizeType]), background=True) for _ in range(self.num_background_asteroids)]
         
+        self.picked_up_items: List[Item] = list()
+
         self.score = Score(self.screen, self.font_path)
         self.clock = pygame.time.Clock()
         self.game_tick = 0
@@ -173,6 +176,9 @@ class Game:
         # Items
         [item.update() for item in self.items]
 
+        for item in self.picked_up_items:
+            item.perform_action(score=self.score, player=None, asteroids=self.asteroids, aliens=self.aliens, play_sounds_function=self._play_asteroid_sound)
+
         return True
     
 
@@ -182,6 +188,9 @@ class Game:
 
         # Aesthetics only
         [background_asteroid.render() for background_asteroid in self.background_asteroids]
+
+        for item in self.picked_up_items:
+            item.render_item_effect()
 
         # Player and bullets
         for player in self.players:
@@ -225,7 +234,8 @@ class Game:
             pygame.mixer.Channel(channel).play(cheer)
             status_surface = font_title.render("YOU WIN!", False, (0, 180, 0))
             for player in self.players:
-                player.color = "green"
+                if not player.is_dead():
+                    player.color = "green"
         if not self.win:
             pygame.mixer.Channel(channel).play(boo)
             status_surface = font_title.render("OOPS! YOU LOSE!", False, (180, 0, 0))
@@ -285,7 +295,7 @@ class Game:
         # Draw Score
         size = 150
         score_x_loc = self.screen_width / 2 - size
-        score_y_loc = self.screen_height / 2
+        score_y_loc = self.screen_height / 2 - size / 2
         self.score.render(score_x_loc, score_y_loc, size=size)  
 
         # Play Again text
@@ -338,7 +348,8 @@ class Game:
         for player in self.players:
             for item in self.items:
                 if item.position.distance_to(player.position) < (player.BOUNDS_RADIUS + (item.hitbox / 2)):
-                    item.perform_action(player=player)
+                    # item.perform_action(player=player, asteroids=self.asteroids, aliens=self.aliens, play_sounds_function=self._play_asteroid_sound)
+                    self.picked_up_items.append(item)
                     self.items.remove(item)
                     break
                 
@@ -377,8 +388,7 @@ class Game:
             # Update score
             self.score.alien_hit()
             # Update bullets
-            if bullet in player.bullets:
-                player.bullets.remove(bullet)
+            player.bullets.remove(bullet)
             # Remove alien
             self.aliens.remove(alien)
 
@@ -388,7 +398,15 @@ class Game:
     
     def _spawn_item_with_chance(self, spawn_rate, thing):
         if random.random() < spawn_rate:
-            item = PlusBulletItem(self.screen, self.fps, thing.position.copy(), 5)
+            item = None
+            bullet_item = PlusBulletItem(self.screen, self.fps, thing.position.copy(), 5)
+            nuke_item = NukeItem(self.screen, self.fps, thing.position.copy(), 5)
+            all_items = bullet_item, nuke_item
+
+            # Probabilities are normalized. Probability values should be considered relative to their sum
+            item_pobabilities = 0, 1
+            item_probabilities_norm = [float(prob)/sum(item_pobabilities) for prob in item_pobabilities]
+            item = random.choices(all_items, weights=item_probabilities_norm)[0]
             self.items.append(item)
                     
     def _handle_thing_bullet_collisions(self, interactable_objects):

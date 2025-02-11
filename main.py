@@ -22,7 +22,7 @@ def main():
 
     # Start Game
     screen_width = 1400
-    screen_height = 900
+    screen_height = 700
     screen = pygame.display.set_mode((screen_width, screen_height))
     font_path = "Fonts/novem.ttf"
     running = True
@@ -45,13 +45,16 @@ def update_high_score(user, score, max_saved=15):
     store_high_score(high_scores)
 
 def get_current_high_scores():
-    # Reading high score file
-    with open("shared_info/high_score") as file:
-        scores = list()
-        for line in file.readlines():
-            user, score = line.split("=")
-            scores.append((user, int(score)))
-    return scores
+    try:
+        # Reading high score file
+        with open("shared_info/high_score") as file:
+            scores = list()
+            for line in file.readlines():
+                user, score = line.split("=")
+                scores.append((user, int(score)))
+        return scores
+    except:
+        return list()
 
 
 def store_high_score(scores:List[Tuple[str,int]]): # Ordered list
@@ -59,8 +62,6 @@ def store_high_score(scores:List[Tuple[str,int]]): # Ordered list
     with open("shared_info/high_score", "w") as file:
         for score in scores:
             file.write(score[0] + "=" + str(score[1]) + "\n")
-
-
 
 if __name__ == "__main__":
     main()
