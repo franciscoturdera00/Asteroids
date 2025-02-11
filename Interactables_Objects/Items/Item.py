@@ -45,7 +45,6 @@ class Item(ABC):
     def perform_action(self, score: Score = None, player: Player = None, asteroids: List[Asteroid] = None, aliens: List[Alien] = None, play_sounds_function: Callable[[int], None] = None):
         # DO NOT MODIFY IN SUBCLASS
         self.ticks_since_grabbed += 1
-        self.render_item_effect()
         self.perform_action_on_score(score)
         self.perform_action_on_player(player)
         self.perform_action_on_asteroids(asteroids, play_sounds_function)

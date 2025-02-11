@@ -3,7 +3,7 @@ import pygame
 from Interactables_Objects.Asteroid import SizeType
 from Interactables_Objects.Items.Item import Item
 
-class NukeItem(Item):
+class BlackHoleItem(Item):
 
     NUKE_RADIUS = 500
     PACE = 5
@@ -14,27 +14,28 @@ class NukeItem(Item):
     
     def perform_action_on_asteroids(self, asteroids, play_sounds_function = None):
         if self.ticks_since_grabbed * self.PACE <= self.NUKE_RADIUS:
-            def loop():
+            def eat_everything():
                 for asteroid in asteroids:
                     if asteroid.position.distance_to(self.position) <= self.ticks_since_grabbed * self.PACE:
                         asteroids.remove(asteroid)
                         play_sounds_function(asteroid.size)
-                        loop()
+                        eat_everything()
                         break
-            loop()
+            eat_everything()
             return True
         return False
 
     def perform_action_on_aliens(self, aliens, play_sounds_function = None):
         if self.ticks_since_grabbed * self.PACE <= self.NUKE_RADIUS:
-            def loop():
+            def eat_everything():
                 for asteroid in aliens:
                     if asteroid.position.distance_to(self.position) <= self.ticks_since_grabbed * self.PACE:
                         aliens.remove(asteroid)
                         play_sounds_function(SizeType.MEDIUM)
-                        loop()
+                        eat_everything()
                         break
-            loop()
+            eat_everything()
+            return True
         return False
     
     def render(self):

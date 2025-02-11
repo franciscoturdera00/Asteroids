@@ -2,13 +2,13 @@
 from copy import deepcopy
 import math
 import random
-from typing import Callable, List
+from typing import Callable, List, Tuple
 import pygame
 
 from Interactables_Objects.Alien import Alien
 from Interactables_Objects.Asteroid import ASTEROID_ORDERED_SIZES, Asteroid, SizeType
 from Interactables_Objects.Items.Item import Item
-from Interactables_Objects.Items.NukeItem import NukeItem
+from Interactables_Objects.Items.BlackHoleItem import BlackHoleItem
 from Interactables_Objects.Items.PlusBulletItem import PlusBulletItem
 from Interactables_Objects.Player import Player
 from game_logic.Score import Score
@@ -59,7 +59,7 @@ class Game:
         # Initiate Background Aesthetics
         self.background_asteroids: List[Asteroid] = [Asteroid(self.screen, random.choice([s for s in SizeType]), background=True) for _ in range(self.num_background_asteroids)]
         
-        self.picked_up_items: List[Item] = list()
+        self.picked_up_items: List[Tuple[Item, Player]] = list()
 
         self.score = Score(self.screen, self.font_path)
         self.clock = pygame.time.Clock()
@@ -176,8 +176,8 @@ class Game:
         # Items
         [item.update() for item in self.items]
 
-        for item in self.picked_up_items:
-            item.perform_action(score=self.score, player=None, asteroids=self.asteroids, aliens=self.aliens, play_sounds_function=self._play_asteroid_sound)
+        for item, player in self.picked_up_items:
+            item.perform_action(score=self.score, player=player, asteroids=self.asteroids, aliens=self.aliens, play_sounds_function=self._play_asteroid_sound)
 
         return True
     
@@ -189,8 +189,11 @@ class Game:
         # Aesthetics only
         [background_asteroid.render() for background_asteroid in self.background_asteroids]
 
-        for item in self.picked_up_items:
-            item.render_item_effect()
+        for item, player in self.picked_up_items:
+            cont = item.render_item_effect()
+            if not cont:
+                self.picked_up_items.remove((item, player))
+                break
 
         # Player and bullets
         for player in self.players:
@@ -349,7 +352,7 @@ class Game:
             for item in self.items:
                 if item.position.distance_to(player.position) < (player.BOUNDS_RADIUS + (item.hitbox / 2)):
                     # item.perform_action(player=player, asteroids=self.asteroids, aliens=self.aliens, play_sounds_function=self._play_asteroid_sound)
-                    self.picked_up_items.append(item)
+                    self.picked_up_items.append((item, player))
                     self.items.remove(item)
                     break
                 
@@ -379,10 +382,11 @@ class Game:
                     new_ast = Asteroid(self.screen, new_type, deepcopy(asteroid.position), debugging_mode=self.debugging_mode)
                     self.asteroids.append(new_ast)
             
-            self._spawn_item_with_chance(self.item_spawn_rate, asteroid)
+            self._spawn_item_with_chance(self.item_spawn_rate, asteroid.position)
             
 
     def _handle_alien_bullet_collision(self):
+        alien: Alien
         player, bullet, alien = self._handle_thing_bullet_collisions(self.aliens)
         if alien:
             # Update score
@@ -394,17 +398,17 @@ class Game:
 
             self._play_asteroid_sound(asteroid_size=SizeType.MEDIUM)
 
-            self._spawn_item_with_chance(self.item_spawn_rate * 3, alien)
+            self._spawn_item_with_chance(self.item_spawn_rate * 3, alien.position)
     
-    def _spawn_item_with_chance(self, spawn_rate, thing):
+    def _spawn_item_with_chance(self, spawn_rate, position):
         if random.random() < spawn_rate:
             item = None
-            bullet_item = PlusBulletItem(self.screen, self.fps, thing.position.copy(), 5)
-            nuke_item = NukeItem(self.screen, self.fps, thing.position.copy(), 5)
+            bullet_item = PlusBulletItem(self.screen, self.fps, position.copy(), 5)
+            nuke_item = BlackHoleItem(self.screen, self.fps, position.copy(), 5)
             all_items = bullet_item, nuke_item
 
             # Probabilities are normalized. Probability values should be considered relative to their sum
-            item_pobabilities = 0, 1
+            item_pobabilities = 5,5
             item_probabilities_norm = [float(prob)/sum(item_pobabilities) for prob in item_pobabilities]
             item = random.choices(all_items, weights=item_probabilities_norm)[0]
             self.items.append(item)
