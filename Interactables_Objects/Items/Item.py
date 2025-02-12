@@ -38,7 +38,6 @@ class Item(ABC):
         # self.repr = pygame.image.load(self.image_file_path).convert()
         # self.screen.blit(self.repr, (pos_x, pos_y))
         raise NotImplementedError("Item must implement 'render'")
-        # pygame.draw.circle(self.screen, "red", self.position, self.size)
         
     # Action performed when player picks up item
     @final
