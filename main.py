@@ -22,7 +22,7 @@ def main():
 
     # Start Game
     screen_width = 1400
-    screen_height = 700
+    screen_height = 900
     screen = pygame.display.set_mode((screen_width, screen_height))
     font_path = "Fonts/novem.ttf"
     running = True
