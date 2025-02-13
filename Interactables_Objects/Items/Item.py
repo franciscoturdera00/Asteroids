@@ -33,6 +33,7 @@ class Item(ABC):
 
     def play_pick_up_sound(self):
         self.pick_up_sound.play()
+        # self.pick_up_sound.fadeout(4000)
 
     @abstractmethod
     def render(self):
