@@ -30,6 +30,7 @@ class Player:
         self.velocity = [0,0]
         self.scale = scale
         self.hitbox_radius = self.BOUNDS_RADIUS * scale
+        self.original_color = color
         self.color = color
         self.angle = starting_angle
         self.lives = Lives(id, screen)
@@ -155,11 +156,23 @@ class Player:
         self.angle = (self.angle + direction * self.ROTATIONAL_SPEED) % 360
 
     
-    def restart_position(self, invincible=False):
+    def restart_position(self, invincible=True):
         self.position = pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
         self.velocity = [0,0]
         if invincible:
-            self.invincible = True
-            self.invincible_frames = self.fps * self.INVINCIBLE_SECONDS
+            self.make_invincible()
+    
+    def revive(self, restart_position=False, invincible=True):
+        self.color = self.original_color
+        if self.lives.number <= 0:
+            self.lives.number = 1
+        if restart_position:
+            self.restart_position(invincible=invincible)
+        elif invincible:
+            self.make_invincible()
+    
+    def make_invincible(self):
+        self.invincible = True
+        self.invincible_frames = self.fps * self.INVINCIBLE_SECONDS
 
 

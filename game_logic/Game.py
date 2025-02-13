@@ -2,7 +2,7 @@
 from copy import deepcopy
 import math
 import random
-from typing import Callable, List, Tuple
+from typing import  List, Tuple
 import pygame
 
 from Interactables_Objects.Alien import Alien
@@ -40,15 +40,13 @@ class Game:
         # Rates depend on number of players
         self.asteroid_spawn_rate_seconds_per_player = math.ceil(7 / len(self.intial_players_positions))
         self.alien_spawn_rate_seconds_per_player = math.ceil(12 / len(self.intial_players_positions))
-   
-        sounds = self._soundify("Sounds/background_game_music.wav",
-                                "Sounds/player_hit_sound.wav", 
-                                "Sounds/bangLarge.wav", 
-                                "Sounds/bangMedium.wav", 
-                                "Sounds/bangSmall.wav")
-        self.background_music = sounds[0]
-        self.player_hit_sound = sounds[1]
-        self.explosion_sounds_big_to_small = sounds[2:]
+
+        # TODO: Add a bunch of sounds
+        self.background_music = pygame.mixer.Sound("Sounds/background_game_music.wav")
+        self.player_hit_sound = pygame.mixer.Sound("Sounds/player_hit_sound.wav")
+        self.explosion_sounds_big_to_small = [pygame.mixer.Sound("Sounds/bangLarge.wav"),
+                                              pygame.mixer.Sound("Sounds/bangMedium.wav"),
+                                              pygame.mixer.Sound("Sounds/bangSmall.wav")]
         
         self.debugging_mode=debugging_mode
 
@@ -128,10 +126,10 @@ class Game:
                 player.rotate_angle(1)
             if not player.is_dead() and self._player_collision_detected(player):
                 self.score.player_hit()
-                pygame.mixer.Channel(6).play(self.player_hit_sound)
+                self.player_hit_sound.play()
                 dead = player.lives.die()
                 if not dead:
-                    player.restart_position(invincible=True)
+                    player.restart_position()
         all_dead = all([player.is_dead() for player in self.players])
         if all_dead:
             return False
@@ -338,9 +336,6 @@ class Game:
                     return True
         return False
     
-    def _soundify(self, *file_paths):
-        return [pygame.mixer.Sound(file) for file in file_paths]
-    
     def _win(self):
         self.score.win(sum([player.lives.number for player in self.players]))
         self.win = True
@@ -404,9 +399,9 @@ class Game:
     def _spawn_item_with_chance(self, spawn_rate, position):
         if random.random() < spawn_rate:
             item = None
-            bullet_item = PlusBulletItem(self.screen, self.fps, position.copy(), 5)
-            nuke_item = BlackHoleItem(self.screen, self.fps, position.copy(), 5)
-            extra_life_item = ExtraLifeItem(self.screen, self.fps, position.copy(), 5 )
+            bullet_item = PlusBulletItem(self.screen, self.fps, self.players, position.copy(), 5)
+            nuke_item = BlackHoleItem(self.screen, self.fps, self.players, position.copy(), 5)
+            extra_life_item = ExtraLifeItem(self.screen, self.fps, self.players, position.copy(), 5 )
             all_items = bullet_item, nuke_item, extra_life_item
 
             # Probabilities are normalized. Probability values should be considered relative to their sum

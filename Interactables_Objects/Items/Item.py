@@ -14,10 +14,11 @@ class Item(ABC):
     ITEM_LIFETIME_SECONDS = 15
     HITBOX_SCALE = 6 / 5
 
-    def __init__(self, screen: pygame.Surface, fps, initial_location: pygame.Vector2, size, image_file_path="Images/something_wong.png"):
+    def __init__(self, screen: pygame.Surface, fps, players: List[Player], initial_location: pygame.Vector2, size, image_file_path="Images/something_wong.png"):
         self.screen = screen
         self.position = initial_location
         self.size = size
+        self.players = players
         # create a surface object, image is drawn on it.
         # self.repr = pygame.image.load(image_file_path).convert()
         self.image_file_path = image_file_path
