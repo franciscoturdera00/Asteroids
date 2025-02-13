@@ -138,7 +138,8 @@ class Game:
         self._handle_item_player_collision()
 
          # Aesthetics only
-        [background_asteroid.update() for background_asteroid in self.background_asteroids]
+        for background_asteroid in self.background_asteroids:
+            background_asteroid.update()
 
         # Player and bullets
         for player in self.players:
@@ -152,7 +153,8 @@ class Game:
             self.asteroids.append(new_asteroid)
         
         # Asteroids
-        [asteroid.update(players_pos=[player.position for player in self.players]) for asteroid in self.asteroids]
+        for asteroid in self.asteroids:
+            asteroid.update(players_pos=[player.position for player in self.players])
         
         # Spawn new Alien
         if (self.game_tick / self.fps) % self.alien_spawn_rate_seconds_per_player == 0.0:
@@ -173,7 +175,8 @@ class Game:
                 break
 
         # Items
-        [item.update() for item in self.items]
+        for item in self.items:
+            item.update()
 
         for item, player in self.picked_up_items:
             item.perform_action(score=self.score, player=player, asteroids=self.asteroids, aliens=self.aliens, play_sounds_function=self._play_asteroid_sound)
@@ -186,7 +189,8 @@ class Game:
         self.screen.fill("black")
 
         # Aesthetics only
-        [background_asteroid.render() for background_asteroid in self.background_asteroids]
+        for background_asteroid in self.background_asteroids:
+            background_asteroid.render()
 
         for item, player in self.picked_up_items:
             cont = item.render_item_effect()
@@ -197,11 +201,12 @@ class Game:
         # Player and bullets
         for player in self.players:
             player.render()
-            [bullet.render() for bullet in player.bullets]
+            for bullet in player.bullets:
+                bullet.render()
 
         # Asteroids
-        [asteroid.render() for asteroid in self.asteroids]
-
+        for asteroid in self.asteroids:
+            asteroid.render()
         # Score
         score_x_loc = self.screen_width / 25
         score_y_loc = self.screen_height / 20
@@ -260,13 +265,19 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "quit"
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pygame.mixer.Channel(sound_channel).stop()
-                return False
+            # if event.type == pygame.MOUSEBUTTONDOWN:
+            #     pygame.mixer.Channel(sound_channel).stop()
+            #     return False
+            
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_p]:
+            pygame.mixer.Channel(sound_channel).stop()
+            return False
             
         # Background Aesthetics
-        [background_asteroid.update([player.position for player in self.players]) for background_asteroid in self.background_asteroids] 
-
+        for background_asteroid in self.background_asteroids:
+            background_asteroid.update([player.position for player in self.players])
+                                       
         # Update rest of (inactive) game
         for player in self.players:
             if not self.win or player.is_dead():
@@ -280,29 +291,31 @@ class Game:
             alien.update([player.position for player in self.players])
         
         # Asteorids
-        [asteroid.update(players_pos=[player.position for player in self.players]) for asteroid in self.asteroids]
+        for asteroid in self.asteroids:
+            asteroid.update(players_pos=[player.position for player in self.players])
 
         return True
     
 
-    def _render_post_game(self, size, font_play_again, status_surface):
+    def _render_post_game(self, size, font_play_again: pygame.font.Font, status_surface):
         # fill the screen with a color to wipe away anything from last frame
         self.screen.fill("black")
         # Draw background asteroids before text
-        [background_asteroid.render() for background_asteroid in self.background_asteroids]
+        for background_asteroid in self.background_asteroids:
+            background_asteroid.render()
 
         # Win / Lose text
-        self.screen.blit(status_surface, (self.screen_width / 2 - size * 3, self.screen_height / 3 - size))
+        self.screen.blit(status_surface, (self.screen_width / 5, size * 2 / 3))
 
         # Draw Score
         size = 150
         score_x_loc = self.screen_width / 2 - size
-        score_y_loc = self.screen_height / 2 - size / 2
+        score_y_loc = self.screen_height / 3 - size / 2
         self.score.render(score_x_loc, score_y_loc, size=size)  
 
         # Play Again text
-        play_again_surface = font_play_again.render("Click to Play Again", False, (100, 100, 100))
-        self.screen.blit(play_again_surface, (self.screen_width / 2 - size * 2, self.screen_height * 4 / 5 - size / 2))
+        play_again_surface = font_play_again.render("[P] Play Again", False, (100, 100, 100))
+        self.screen.blit(play_again_surface, (self.screen_width - size * 3, self.screen_height - size))
         
         # Player
         for player in self.players:
@@ -313,7 +326,8 @@ class Game:
             alien.render()
 
         # Asteroids
-        [asteroid.render() for asteroid in self.asteroids]
+        for asteroid in self.asteroids:
+            asteroid.render()
 
         # flip() the display to put your work on screen
         pygame.display.flip()
@@ -399,8 +413,8 @@ class Game:
         if random.random() < spawn_rate:
             item = None
             bullet_item = PlusBulletItem(self.screen, self.fps, self.players, position.copy(), 5)
-            nuke_item = BlackHoleItem(self.screen, self.fps, self.players, position.copy(), 5)
-            extra_life_item = ExtraLifeItem(self.screen, self.fps, self.players, position.copy(), 5)
+            nuke_item = BlackHoleItem(self.screen, self.fps, self.players, position.copy(), 7)
+            extra_life_item = ExtraLifeItem(self.screen, self.fps, self.players, position.copy(), 7)
             all_items = bullet_item, nuke_item, extra_life_item
 
             # Probabilities are normalized. Probability values should be considered relative to their sum
