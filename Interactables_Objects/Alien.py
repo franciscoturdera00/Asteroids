@@ -26,6 +26,8 @@ class Alien:
         self.goal = self._generate_random_point_within_square(self.position, 150)
         self.velocity = self._generate_velocity_to_goal(1)
 
+        self._destroy_sound = pygame.mixer.Sound("Sounds/alien_hit.wav")
+
         self.debugging_mode=debugging_mode
 
     def update(self, player_positions):
@@ -54,8 +56,9 @@ class Alien:
         if self.debugging_mode:
             self._render_hit_box()
 
+    def play_hit_sound(self):
+        self._destroy_sound.play()
     
-
     def _render_shape(self):
         pygame.draw.ellipse(self.screen, "black", pygame.Rect(self.position.x - self.size, self.position.y - self.size / 2, self.size * 2, self.size), 0)
         pygame.draw.line(self.screen, "green", pygame.Vector2(self.position.x, self.position.y - self.size / 2), pygame.Vector2(self.position.x, self.position.y - self.size + 5), 5)

@@ -17,7 +17,7 @@ def main():
     # Initilalize game dev lib
     pygame.init()
     pygame.font.init()
-    pygame.mixer.init()
+    pygame.mixer.init(48000, -16, 1, 1024)
     pygame.display.set_caption("ASTEROIDS")
 
     # Start Game

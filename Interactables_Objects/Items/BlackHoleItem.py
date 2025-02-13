@@ -8,9 +8,9 @@ class BlackHoleItem(Item):
     NUKE_RADIUS = 500
     PACE = 5
 
-    def __init__(self, screen, fps, initial_location, size, image_file_path="Images/something_wong.png"):
+    def __init__(self, screen, fps, initial_location, size, pick_up_sound_path="Sounds/life_item.mp3"):
         self.retreat_tick = 0
-        super().__init__(screen, fps, initial_location, size, image_file_path)
+        super().__init__(screen, fps, initial_location, size, pick_up_sound_path)
     
     def perform_action_on_asteroids(self, asteroids, play_sounds_function = None):
         if self.ticks_since_grabbed * self.PACE <= self.NUKE_RADIUS:

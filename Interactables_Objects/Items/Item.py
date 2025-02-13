@@ -14,14 +14,12 @@ class Item(ABC):
     ITEM_LIFETIME_SECONDS = 15
     HITBOX_SCALE = 6 / 5
 
-    def __init__(self, screen: pygame.Surface, fps, players: List[Player], initial_location: pygame.Vector2, size, image_file_path="Images/something_wong.png"):
+    def __init__(self, screen: pygame.Surface, fps, players: List[Player], initial_location: pygame.Vector2, size, pick_up_sound_path="Sounds/life_item.mp3"):
         self.screen = screen
         self.position = initial_location
         self.size = size
         self.players = players
-        # create a surface object, image is drawn on it.
-        # self.repr = pygame.image.load(image_file_path).convert()
-        self.image_file_path = image_file_path
+        self.pick_up_sound = pygame.mixer.Sound(pick_up_sound_path)
         self.ticks_left = fps * self.ITEM_LIFETIME_SECONDS
         self.show = True
         self.ticks_since_grabbed = 0
@@ -32,6 +30,9 @@ class Item(ABC):
         self.ticks_left -= 1
         if self.ticks_left % 15 == 0:
             self.show = not self.show
+
+    def play_pick_up_sound(self):
+        self.pick_up_sound.play()
 
     @abstractmethod
     def render(self):

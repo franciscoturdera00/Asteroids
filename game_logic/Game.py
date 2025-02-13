@@ -43,7 +43,7 @@ class Game:
 
         # TODO: Add a bunch of sounds
         self.background_music = pygame.mixer.Sound("Sounds/background_game_music.wav")
-        self.player_hit_sound = pygame.mixer.Sound("Sounds/player_hit_sound.wav")
+        self.player_hit_sound = pygame.mixer.Sound("Sounds/player_hit.mp3")
         self.explosion_sounds_big_to_small = [pygame.mixer.Sound("Sounds/bangLarge.wav"),
                                               pygame.mixer.Sound("Sounds/bangMedium.wav"),
                                               pygame.mixer.Sound("Sounds/bangSmall.wav")]
@@ -347,7 +347,7 @@ class Game:
         for player in self.players:
             for item in self.items:
                 if item.position.distance_to(player.position) < (player.BOUNDS_RADIUS + (item.hitbox / 2)):
-                    # item.perform_action(player=player, asteroids=self.asteroids, aliens=self.aliens, play_sounds_function=self._play_asteroid_sound)
+                    item.play_pick_up_sound()
                     self.picked_up_items.append((item, player))
                     self.items.remove(item)
                     break
@@ -391,8 +391,7 @@ class Game:
             player.bullets.remove(bullet)
             # Remove alien
             self.aliens.remove(alien)
-
-            self._play_asteroid_sound(asteroid_size=SizeType.MEDIUM)
+            alien.play_hit_sound()
 
             self._spawn_item_with_chance(self.item_spawn_rate * 3, alien.position)
     
