@@ -1,5 +1,7 @@
 
 from abc import ABC, abstractmethod
+import math
+import random
 from typing import Callable, List, final, override
 import pygame
 
@@ -13,6 +15,7 @@ class Item(ABC):
 
     ITEM_LIFETIME_SECONDS = 15
     HITBOX_SCALE = 6 / 5
+    ITEM_PACE = 0.7
 
     def __init__(self, screen: pygame.Surface, fps, players: List[Player], initial_location: pygame.Vector2, size, pick_up_sound_path="Sounds/life_item.mp3"):
         self.screen = screen
@@ -21,15 +24,32 @@ class Item(ABC):
         self.players = players
         self.pick_up_sound = pygame.mixer.Sound(pick_up_sound_path)
         self.ticks_left = fps * self.ITEM_LIFETIME_SECONDS
+        self.fps = fps
         self.show = True
         self.ticks_since_grabbed = 0
+
+        self.velocity = self._change_direction()
 
         self.hitbox = float(size * self.HITBOX_SCALE)
     
     def update(self):   
         self.ticks_left -= 1
+        self.position.x += self.velocity[0]
+        self.position.x %= self.screen.get_width()
+        self.position.y += self.velocity[1]
+        self.position.y %= self.screen.get_height()
         if self.ticks_left % 15 == 0:
             self.show = not self.show
+        if self.ticks_left % math.ceil(self.fps * self.ITEM_LIFETIME_SECONDS / 5) == 0:
+            self.velocity = self._change_direction()
+    
+    def _change_direction(self):
+        angle = random.random() * 2 * math.pi
+        max_x_vel = self.ITEM_PACE * math.cos(angle)
+        max_y_vel = self.ITEM_PACE * math.sin(angle)
+        return random.random() * max_x_vel, random.random() * max_y_vel
+
+        
 
     def play_pick_up_sound(self):
         self.pick_up_sound.play()
