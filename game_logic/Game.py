@@ -30,7 +30,7 @@ class Game:
         self.num_background_asteroids=300
         self.initial_asteroid_number=7
         self.initial_player_lives=3
-        self.item_spawn_rate = .2
+        self.item_spawn_rate = 1
         
         if two_player:
             self.intial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]

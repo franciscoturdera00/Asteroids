@@ -44,4 +44,26 @@ pyinstaller main.py
 
 ## About Asteroids
 
-Player: ![Player](https://github.com/franciscoturdera00/Asteroids/blob/main/Images/player.png?raw=true)
+`Player`: Can thrust forward, rotate left, rotate right, and shoot lasers
+
+![Player](https://github.com/franciscoturdera00/Asteroids/blob/main/Images/player.png?raw=true)
+
+`Asteroid`: A moving obstacle of varying sizes. Watch out, asteroid trajectory is slightly are affected by the gravitational pull of the player!
+
+![Asteroid](https://github.com/franciscoturdera00/Asteroids/blob/main/Images/asteroid.png?raw=true)
+
+`Alien`: A smart opponent that will move towards your position at various speeds and intervals.
+
+![Alien](https://github.com/franciscoturdera00/Asteroids/blob/main/Images/alien.png?raw=true)
+
+### Items
+
+`Bullet`: An extra bullet added to the player's arsenal
+
+![Bullet](https://github.com/franciscoturdera00/Asteroids/blob/main/Images/shot.png?raw=true)
+
+`Black Hole`: A growing black hole that destroys everything it touches
+
+![Nuke](https://github.com/franciscoturdera00/Asteroids/blob/main/Images/nuke.png?raw=true)
+
+
