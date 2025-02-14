@@ -44,4 +44,4 @@ pyinstaller main.py
 
 ## About Asteroids
 
-Player: ![Player](https://github.com/franciscoturdera00/Asteroids/blob/main/player.png?raw=true)
+Player: ![Player](https://github.com/franciscoturdera00/Asteroids/blob/Images/player.png?raw=true)
