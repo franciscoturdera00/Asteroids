@@ -41,3 +41,7 @@ pyinstaller main.py
 ```
 ./dist/main/main.exe
 ```
+
+## About Asteroids
+
+Player: ![Player](https://github.com/franciscoturdera00/Asteroids/blob/main/player.png?raw=true)
