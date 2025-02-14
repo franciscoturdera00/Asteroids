@@ -48,7 +48,7 @@ pyinstaller main.py
 
 ![Player](https://github.com/franciscoturdera00/Asteroids/blob/main/Images/player.png?raw=true)
 
-`Asteroid`: A moving obstacle of varying sizes. Watch out, asteroid trajectory is slightly are affected by the gravitational pull of the player!
+`Asteroid`: A moving obstacle of varying sizes. Watch out, asteroid trajectory is slightly affected by the gravitational pull of the player!
 
 ![Asteroid](https://github.com/franciscoturdera00/Asteroids/blob/main/Images/asteroid.png?raw=true)
 
@@ -65,5 +65,9 @@ pyinstaller main.py
 `Black Hole`: A growing black hole that destroys everything it touches
 
 ![Nuke](https://github.com/franciscoturdera00/Asteroids/blob/main/Images/nuke.png?raw=true)
+
+`Extra Life`: An extra life for the player
+
+![life](https://github.com/franciscoturdera00/Asteroids/blob/main/Images/life_item.png?raw=true)
 
 
