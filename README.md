@@ -30,3 +30,14 @@ python -m pip install -r requirements.txt
 ```
 python main.py
 ```
+
+### Optional 
+
+### Create Local Executable
+```
+pyinstaller main.py
+```
+##### Copy `Sounds` and `Fonts` folders into ./dist/main
+```
+./dist/main/main.exe
+```
