@@ -245,7 +245,7 @@ class Game:
                     player.color = "green"
         if not self.win:
             pygame.mixer.Channel(channel).play(boo)
-            status_surface = font_title.render("OOPS! YOU LOSE!", False, (180, 0, 0))
+            status_surface = font_title.render("YOU LOSE!", False, (180, 0, 0))
             for player in self.players:
                 player.color = "red"
         
