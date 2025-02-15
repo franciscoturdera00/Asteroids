@@ -31,7 +31,7 @@ def main():
     while running:
         game = Game(screen=screen, font_path=font_path, two_player=pre_game.multiplayer, debugging_mode=False)
         running = game.run()
-        update_high_score("test", game.score.score)
+        # update_high_score("test", game.score.score)
     
     # deactivates the pygame library
     pygame.quit()
