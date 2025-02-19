@@ -9,10 +9,26 @@ def main():
     # Leaving in case of decoupling game screens
     # Optional Arguments
     # --p2: 2-Player Mode
-    # parser = argparse.ArgumentParser()
+    # parser.add_argument("width")
     # parser.add_argument("--p2", help = "Two Player Mode", action='store_true')
-    # args = parser.parse_args()
     # two_player = args.p2
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("width", nargs="?", help="Screen Width, must be used with height argument")
+    parser.add_argument("height", nargs="?", help="Screen Height, must be used with width argument")
+    args = parser.parse_args()
+
+    if args.width and not args.height:
+        exit("Must have 0 or 2 arguments (screen width and height)")
+
+    # Default Values
+    screen_width = 1400
+    screen_height = 900
+
+    if args.width:
+        screen_width = int(args.width)
+        screen_height = int(args.height)
+
 
     # Initilalize game dev lib
     pygame.init()
@@ -21,8 +37,6 @@ def main():
     pygame.display.set_caption("ASTEROIDS")
 
     # Start Game
-    screen_width = 1400
-    screen_height = 900
     screen = pygame.display.set_mode((screen_width, screen_height))
     font_path = "Fonts/novem.ttf"
     running = True
