@@ -5,14 +5,6 @@ from game_logic.PreGame import PreGame
 from game_logic.Game import Game
 
 def main():
-    # Old way of doing 2-player
-    # Leaving in case of decoupling game screens
-    # Optional Arguments
-    # --p2: 2-Player Mode
-    # parser.add_argument("width")
-    # parser.add_argument("--p2", help = "Two Player Mode", action='store_true')
-    # two_player = args.p2
-
     parser = argparse.ArgumentParser()
     parser.add_argument("width", nargs="?", help="Screen Width, must be used with height argument")
     parser.add_argument("height", nargs="?", help="Screen Height, must be used with width argument")
