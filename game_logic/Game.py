@@ -28,7 +28,7 @@ class Game:
         self.fps=45
 
         self.num_background_asteroids=300
-        self.initial_asteroid_number=7
+        self.initial_asteroid_number=1
         self.initial_player_lives=3
         self.item_spawn_rate = .2
         
@@ -38,12 +38,12 @@ class Game:
             self.intial_players_positions = [(-self.screen_width / 2, self.screen_height / 2)]
         
         # Rates depend on number of players
-        self.asteroid_spawn_rate_seconds_per_player = math.ceil(7 / len(self.intial_players_positions))
-        self.alien_spawn_rate_seconds_per_player = math.ceil(12 / len(self.intial_players_positions))
+        self.asteroid_spawn_rate_seconds_per_player = math.ceil(70 / len(self.intial_players_positions))
+        self.alien_spawn_rate_seconds_per_player = math.ceil(120 / len(self.intial_players_positions))
 
         # TODO: Add a bunch of sounds
         self.background_music = pygame.mixer.Sound("Sounds/background_game_music.wav")
-        self.player_hit_sound = pygame.mixer.Sound("Sounds/player_hit.mp3")
+        self.player_hit_sound = pygame.mixer.Sound("Sounds/player_hit.wav")
         self.explosion_sounds_big_to_small = [pygame.mixer.Sound("Sounds/bangLarge.wav"),
                                               pygame.mixer.Sound("Sounds/bangMedium.wav"),
                                               pygame.mixer.Sound("Sounds/bangSmall.wav")]
@@ -385,6 +385,7 @@ class Game:
             player.bullets.remove(bullet)
             # Update asteroids and its side effects
             self._update_asteroids_after_collision(asteroid)
+            self._play_asteroid_sound(asteroid_size=asteroid.size)
 
 
     def _update_asteroids_after_collision(self, asteroid: Asteroid):
@@ -393,8 +394,6 @@ class Game:
         # Update asteroids
         self.asteroids.remove(asteroid)
         new_type = ASTEROID_ORDERED_SIZES[ASTEROID_ORDERED_SIZES.index(SizeType(asteroid.size)) + 1]
-
-        self._play_asteroid_sound(asteroid_size=asteroid.size)
 
         # New Asteroids - No new ones if asteroid is smallest
         if new_type is not None:
@@ -413,13 +412,13 @@ class Game:
             player.bullets.remove(bullet)
             # Update aliens and its side effects
             self._update_aliens_after_collision(alien)
+            alien.play_hit_sound()
     
     def _update_aliens_after_collision(self, alien: Alien):
         # Update score
         self.score.alien_hit()
         # Remove alien
         self.aliens.remove(alien)
-        alien.play_hit_sound()
         # Spawn Item
         self._spawn_item_with_chance(self.item_spawn_rate * 3, alien.position)
     

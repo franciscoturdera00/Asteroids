@@ -10,7 +10,7 @@ from game_logic.Score import Score
 
 class PlusBulletItem(Item):
 
-    def __init__(self, screen, fps, players, initial_location, size, pick_up_sound_path="Sounds/bullet_pick_up.mp3"):
+    def __init__(self, screen, fps, players, initial_location, size, pick_up_sound_path="Sounds/bullet_pick_up.wav"):
         super().__init__(screen, fps, players, initial_location, size, pick_up_sound_path)
 
     def render(self):

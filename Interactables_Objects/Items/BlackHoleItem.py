@@ -8,7 +8,7 @@ class BlackHoleItem(Item):
     NUKE_RADIUS = 500
     PACE = 5
 
-    def __init__(self, screen, fps, players, initial_location, size, pick_up_sound_path="Sounds/blackhole.mp3"):
+    def __init__(self, screen, fps, players, initial_location, size, pick_up_sound_path="Sounds/blackhole.wav"):
         self.retreat_tick = 0
         super().__init__(screen, fps, players, initial_location, size, pick_up_sound_path)
     

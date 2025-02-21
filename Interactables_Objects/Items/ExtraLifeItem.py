@@ -5,7 +5,7 @@ from Interactables_Objects.Items.Item import Item
 
 class ExtraLifeItem(Item):
 
-    def __init__(self, screen, fps, players, initial_location, size, pick_up_sound_path="Sounds/life_item.mp3"):
+    def __init__(self, screen, fps, players, initial_location, size, pick_up_sound_path="Sounds/life_item.wav"):
         A = 0.5
         self.color = [255 * A, 255 * A, 255 * A]
         super().__init__(screen, fps, players, initial_location, size, pick_up_sound_path)

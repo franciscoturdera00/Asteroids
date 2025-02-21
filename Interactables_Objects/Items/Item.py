@@ -17,7 +17,7 @@ class Item(ABC):
     HITBOX_SCALE = 6 / 5
     ITEM_PACE = 0.7
 
-    def __init__(self, screen: pygame.Surface, fps, players: List[Player], initial_location: pygame.Vector2, size, pick_up_sound_path="Sounds/life_item.mp3"):
+    def __init__(self, screen: pygame.Surface, fps, players: List[Player], initial_location: pygame.Vector2, size, pick_up_sound_path="Sounds/life_item.wav"):
         self.screen = screen
         self.position = initial_location
         self.size = size
