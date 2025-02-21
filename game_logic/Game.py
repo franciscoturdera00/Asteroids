@@ -2,7 +2,7 @@
 from copy import deepcopy
 import math
 import random
-from typing import  List, Tuple
+from typing import  List, Tuple, Union
 import pygame
 
 from Interactables_Objects.Alien import Alien
@@ -124,12 +124,18 @@ class Game:
             if player.is_dead():
                 player.color = "red"
                 player.rotate_angle(1)
-            if not player.is_dead() and self._player_collision_detected(player):
-                self.score.player_hit()
-                self.player_hit_sound.play()
-                dead = player.lives.die()
-                if not dead:
-                    player.restart_position()
+            else:
+                collision = self._player_collision_detected(player)
+                if collision:
+                    self.score.player_hit()
+                    self.player_hit_sound.play()
+                    dead = player.lives.die()
+                    if type(collision) == Asteroid:
+                        self._update_asteroids_after_collision(collision)
+                    elif type(collision) == Alien:
+                        self._update_aliens_after_collision(collision)
+                    if not dead:
+                        player.restart_position()
         all_dead = all([player.is_dead() for player in self.players])
         if all_dead:
             return False
@@ -332,7 +338,7 @@ class Game:
         # flip() the display to put your work on screen
         pygame.display.flip()
 
-    def _player_collision_detected(self, player: Player):
+    def _player_collision_detected(self, player: Player) -> Union[Asteroid, Alien, None]:
         return self._player_collision_with_asteroid_detected(player) or self._player_collision_with_alien_detected(player)
         
     def _player_collision_with_asteroid_detected(self, player: Player):
@@ -347,7 +353,7 @@ class Game:
                 actual_distance = player.position.distance_to(thing.position)
                 min_distance = player.hitbox_radius + thing.hitbox_radius
                 if actual_distance <= min_distance:
-                    return True
+                    return thing
         return False
     
     def _win(self):
@@ -375,39 +381,47 @@ class Game:
         asteroid: Asteroid
         player, bullet, asteroid = self._handle_thing_bullet_collisions(self.asteroids)
         if asteroid:
-            # Update score
-            self.score.asteroid_hit(asteroid.size)
             # Update bullets
             player.bullets.remove(bullet)
+            # Update asteroids and its side effects
+            self._update_asteroids_after_collision(asteroid)
 
-            # Update asteroids
-            self.asteroids.remove(asteroid)
-            new_type = ASTEROID_ORDERED_SIZES[ASTEROID_ORDERED_SIZES.index(SizeType(asteroid.size)) + 1]
 
-            self._play_asteroid_sound(asteroid_size=asteroid.size)
+    def _update_asteroids_after_collision(self, asteroid: Asteroid):
+        # Update score
+        self.score.asteroid_hit(asteroid.size)
+        # Update asteroids
+        self.asteroids.remove(asteroid)
+        new_type = ASTEROID_ORDERED_SIZES[ASTEROID_ORDERED_SIZES.index(SizeType(asteroid.size)) + 1]
 
-            # New Asteroids - No new ones if asteroid is smallest
-            if new_type is not None:
-                for _ in range(2):
-                    new_ast = Asteroid(self.screen, new_type, deepcopy(asteroid.position), debugging_mode=self.debugging_mode)
-                    self.asteroids.append(new_ast)
-            
-            self._spawn_item_with_chance(self.item_spawn_rate, asteroid.position)
-            
+        self._play_asteroid_sound(asteroid_size=asteroid.size)
+
+        # New Asteroids - No new ones if asteroid is smallest
+        if new_type is not None:
+            for _ in range(2):
+                new_ast = Asteroid(self.screen, new_type, deepcopy(asteroid.position), debugging_mode=self.debugging_mode)
+                self.asteroids.append(new_ast)
+        # Spawn Item
+        self._spawn_item_with_chance(self.item_spawn_rate, asteroid.position)
+
 
     def _handle_alien_bullet_collision(self):
         alien: Alien
         player, bullet, alien = self._handle_thing_bullet_collisions(self.aliens)
         if alien:
-            # Update score
-            self.score.alien_hit()
             # Update bullets
             player.bullets.remove(bullet)
-            # Remove alien
-            self.aliens.remove(alien)
-            alien.play_hit_sound()
-
-            self._spawn_item_with_chance(self.item_spawn_rate * 3, alien.position)
+            # Update aliens and its side effects
+            self._update_aliens_after_collision(alien)
+    
+    def _update_aliens_after_collision(self, alien: Alien):
+        # Update score
+        self.score.alien_hit()
+        # Remove alien
+        self.aliens.remove(alien)
+        alien.play_hit_sound()
+        # Spawn Item
+        self._spawn_item_with_chance(self.item_spawn_rate * 3, alien.position)
     
     def _spawn_item_with_chance(self, spawn_rate, position):
         if random.random() < spawn_rate:
