@@ -28,7 +28,7 @@ class Game:
         self.fps=45
 
         self.num_background_asteroids=300
-        self.initial_asteroid_number=1
+        self.initial_asteroid_number=7
         self.initial_player_lives=3
         self.item_spawn_rate = .2
         
@@ -38,8 +38,8 @@ class Game:
             self.intial_players_positions = [(-self.screen_width / 2, self.screen_height / 2)]
         
         # Rates depend on number of players
-        self.asteroid_spawn_rate_seconds_per_player = math.ceil(70 / len(self.intial_players_positions))
-        self.alien_spawn_rate_seconds_per_player = math.ceil(120 / len(self.intial_players_positions))
+        self.asteroid_spawn_rate_seconds_per_player = math.ceil(7 / len(self.intial_players_positions))
+        self.alien_spawn_rate_seconds_per_player = math.ceil(12 / len(self.intial_players_positions))
 
         # TODO: Add a bunch of sounds
         self.background_music = pygame.mixer.Sound("Sounds/background_game_music.wav")

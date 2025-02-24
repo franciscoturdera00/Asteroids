@@ -2,9 +2,6 @@
 import math
 import pygame
 
-from Interactables_Objects.Utils import calculate_new_rotated_position
-
-
 class Bullet:
 
     RADIUS = 2
