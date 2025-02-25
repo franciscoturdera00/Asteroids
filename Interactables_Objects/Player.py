@@ -6,7 +6,6 @@ from typing import List
 import pygame
 
 from Interactables_Objects.Bullet import Bullet
-from Interactables_Objects.Utils import calculate_new_rotated_position
 from game_logic.Lives import Lives
 from game_logic.Score import Score
 
@@ -86,7 +85,7 @@ class Player:
         # Draw player according to the angular orientation of Player
         updated_player_shape = list()
         for point in self.player_shape:
-            rotated_x, rotated_y = calculate_new_rotated_position(point, self._angle_in_radians())
+            rotated_x, rotated_y = self._calculate_new_rotated_position(point, self._angle_in_radians())
             updated_player_shape.append((rotated_x, rotated_y))
         if self.show:
             if self.invincible:
@@ -98,7 +97,7 @@ class Player:
         if self.boosting and self.show and random.random() < self.BOOST_SHOW_PERCENTAGE:
             updated_boost_shape = list()
             for point in self.boost_shape:
-                rotated_boost_x, rotated_boost_y = calculate_new_rotated_position(point, self._angle_in_radians())
+                rotated_boost_x, rotated_boost_y = self._calculate_new_rotated_position(point, self._angle_in_radians())
                 updated_boost_shape.append((rotated_boost_x, rotated_boost_y))
         
             pygame.draw.polygon(self.screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_boost_shape], 2)
@@ -106,6 +105,11 @@ class Player:
         if self.debugging_mode:
             pygame.draw.circle(self.screen, "white", self.position, self.hitbox_radius, width=1)
 
+    def _calculate_new_rotated_position(self, point, angle):
+        x, y = point
+        new_x = (x * math.cos(angle)) - (y * math.sin(angle))
+        new_y = (x * math.sin(angle)) + (y * math.cos(angle))
+        return new_x, new_y
         
     def is_dead(self):
         return self.lives.number <= 0
