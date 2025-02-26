@@ -166,7 +166,7 @@ class Player:
         if invincible:
             self.make_invincible()
     
-    def revive(self, restart_position=False, invincible=True):
+    def revive(self, restart_position=True, invincible=True):
         self.color = self.original_color
         if self.lives.number <= 0:
             self.lives.number = 1
