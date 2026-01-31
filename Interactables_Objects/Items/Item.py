@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 import math
 import random
-from typing import Callable, List, final, override
+from typing import Callable, List, final
 import pygame
 
 from Interactables_Objects.Alien import Alien
@@ -64,7 +64,7 @@ class Item(ABC):
         
     # Action performed when player picks up item
     @final
-    def perform_action(self, score: Score = None, player: Player = None, asteroids: List[Asteroid] = None, aliens: List[Alien] = None, play_sounds_function: Callable[[int], None] = None):
+    def perform_action(self, score: Score, player: Player, asteroids: List[Asteroid], aliens: List[Alien], play_sounds_function: Callable[[int], None]):
         # DO NOT MODIFY IN SUBCLASS
         self.ticks_since_grabbed += 1
         self.perform_action_on_score(score)
@@ -73,31 +73,26 @@ class Item(ABC):
         self.perform_action_on_aliens(aliens, play_sounds_function)
 
     # Return True if ongoing, False otherwise
-    @override
     def render_item_effect(self):
         # Modify this function in your Item subclass to draw something on the screen as a result of picking up the item
         return False
-    
+
     # Return True if ongoing, False otherwise
-    @override
     def perform_action_on_player(self, player: Player):
         # Modify this function in your Item subclass to perform an action on the player that picked up this item
         return False
 
     # Return True if ongoing, False otherwise
-    @override
-    def perform_action_on_asteroids(self, asteroids: List[Asteroid], play_sounds_function: Callable[[int], None] = None):#, play_sounds_function: Callable[[int], None] = None):
+    def perform_action_on_asteroids(self, asteroids: List[Asteroid], play_sounds_function: Callable[[int], None] | None = None):
         # Modify this function in your Item subclass to perform an action on any/all interactable asteroids
         return False
 
     # Return True if ongoing, False otherwise
-    @override
-    def perform_action_on_aliens(self, aliens: List[Alien], play_sounds_function: Callable[[int], None] = None):
+    def perform_action_on_aliens(self, aliens: List[Alien], play_sounds_function: Callable[[int], None] | None = None):
         # Modify this function in your Item subclass to perform an action on any/all interactable aliens
         return False
 
     # Return True if ongoing, False otherwise
-    @override
     def perform_action_on_score(self, score: Score):
         # Modify this function in your Item subclass to perform an action on the game score
         return False

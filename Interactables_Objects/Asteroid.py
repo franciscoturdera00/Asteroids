@@ -6,9 +6,9 @@ import pygame
 
 
 class SizeType(IntEnum):
-    LARGE=60
-    MEDIUM=40
-    SMALL=15
+    LARGE=int(60)
+    MEDIUM=int(40)
+    SMALL=int(15)
 
 ASTEROID_ORDERED_SIZES = [SizeType.LARGE, SizeType.MEDIUM, SizeType.SMALL, None]
 SCALE_BACKGROUND_AESTHETIC_ASTEROIDS = 0.3
@@ -24,7 +24,7 @@ class Asteroid:
 
     def __init__(self, screen: pygame.Surface, sizeType: SizeType, position = None, is_in_game_spawn=False, background=False, debugging_mode=False):
         self.screen = screen
-        self.size = sizeType.value
+        self.size: int = sizeType.value
         sign = [-1, 1]
 
         if position:
@@ -46,8 +46,8 @@ class Asteroid:
         R,G,B = rgb
         if background:
             A = random.random() * .2  + .1
-            R,G,B = [A * v for v in rgb]
-            self.size *= SCALE_BACKGROUND_AESTHETIC_ASTEROIDS
+            R,G,B = [int(A * v) for v in rgb]
+            self.size = int(self.size * SCALE_BACKGROUND_AESTHETIC_ASTEROIDS)
             self.x_vel *= 0.1
             self.y_vel *= 0.1
 
@@ -61,7 +61,9 @@ class Asteroid:
     def _generate_random_speed(self):
         return ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED)
     
-    def update(self, players_pos: List[pygame.Vector2] = list()):
+    def update(self, players_pos: List[pygame.Vector2] | None = None):
+        if players_pos is None:
+            players_pos = []
         # Gravitational pull of player on asteroid
         for player_pos in players_pos:
             distance = player_pos.distance_to(self.position)
@@ -96,7 +98,7 @@ class Asteroid:
         uniform_walk_min = 18
         angle_rotated_so_far = random.uniform(uniform_walk_min, uniform_walk_min * 2)
         dist = random.uniform(self.size / 2, self.size)
-        self.vertices = []
+        self.vertices: List[List[float]] = []
         while angle_rotated_so_far < 360:
             self.vertices.append([dist, angle_rotated_so_far])
             dist = random.uniform(self.size / 2, self.size)

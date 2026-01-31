@@ -33,13 +33,13 @@ class Game:
         self.item_spawn_rate = .2
         
         if two_player:
-            self.intial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]
+            self.initial_players_positions = [(-self.screen_width / 3, self.screen_height / 2), (-self.screen_width * 2 / 3, self.screen_height / 2)]
         else:
-            self.intial_players_positions = [(-self.screen_width / 2, self.screen_height / 2)]
-        
+            self.initial_players_positions = [(-self.screen_width / 2, self.screen_height / 2)]
+
         # Rates depend on number of players
-        self.asteroid_spawn_rate_seconds_per_player = math.ceil(7 / len(self.intial_players_positions))
-        self.alien_spawn_rate_seconds_per_player = math.ceil(12 / len(self.intial_players_positions))
+        self.asteroid_spawn_rate_seconds_per_player = math.ceil(7 / len(self.initial_players_positions))
+        self.alien_spawn_rate_seconds_per_player = math.ceil(12 / len(self.initial_players_positions))
 
         # TODO: Add a bunch of sounds
         self.background_music = pygame.mixer.Sound("Sounds/background_game_music.wav")
@@ -67,12 +67,12 @@ class Game:
         
         # INTERACTABLE OBJECTS
         # Initiate Player
-        player_1_initial_position =- pygame.Vector2(self.intial_players_positions[0][0], self.intial_players_positions[0][1])
+        player_1_initial_position =- pygame.Vector2(self.initial_players_positions[0][0], self.initial_players_positions[0][1])
         player1 = Player(0, self.screen, player_1_initial_position,  fps=self.fps, debugging_mode=self.debugging_mode)
         self.players = [player1]
 
-        if len(self.intial_players_positions) == 2:
-            player_2_initial_position =- pygame.Vector2(self.intial_players_positions[1][0], self.intial_players_positions[1][1])
+        if len(self.initial_players_positions) == 2:
+            player_2_initial_position =- pygame.Vector2(self.initial_players_positions[1][0], self.initial_players_positions[1][1])
             player2 = Player(1, self.screen, player_2_initial_position,  fps=self.fps, color="purple",
                              thrust_button=[pygame.K_i, pygame.K_UP], rotate_left_button=[pygame.K_j, pygame.K_LEFT], rotate_right_button=[pygame.K_l, pygame.K_RIGHT], 
                              shoot_button=[pygame.K_RSHIFT],
@@ -130,9 +130,9 @@ class Game:
                     self.score.player_hit()
                     self.player_hit_sound.play()
                     dead = player.lives.die()
-                    if type(collision) == Asteroid:
+                    if isinstance(collision, Asteroid):
                         self._update_asteroids_after_collision(collision)
-                    elif type(collision) == Alien:
+                    elif isinstance(collision, Alien):
                         self._update_aliens_after_collision(collision)
                     if not dead:
                         player.restart_position()
@@ -175,10 +175,9 @@ class Game:
         self.score.update()
 
         # Remove item if time's up
-        for item in self.items:
-            if item.ticks_left <= 0:
-                self.items.remove(item)
-                break
+        expired_items = [item for item in self.items if item.ticks_left <= 0]
+        for item in expired_items:
+            self.items.remove(item)
 
         # Items
         for item in self.items:
@@ -198,11 +197,9 @@ class Game:
         for background_asteroid in self.background_asteroids:
             background_asteroid.render()
 
-        for item, player in self.picked_up_items:
-            cont = item.render_item_effect()
-            if not cont:
-                self.picked_up_items.remove((item, player))
-                break
+        finished_items = [(item, player) for item, player in self.picked_up_items if not item.render_item_effect()]
+        for item_tuple in finished_items:
+            self.picked_up_items.remove(item_tuple)
 
         # Player and bullets
         for player in self.players:
@@ -438,8 +435,8 @@ class Game:
                     
     def _handle_thing_bullet_collisions(self, interactable_objects):
         for player in self.players:
-            for _, bullet in enumerate(player.bullets):
-                for _, interactable_object in enumerate(interactable_objects):          
+            for bullet in player.bullets:
+                for interactable_object in interactable_objects:
                     actual_distance = bullet.position.distance_to(interactable_object.position)
                     min_distance = bullet.RADIUS + interactable_object.hitbox_radius
 

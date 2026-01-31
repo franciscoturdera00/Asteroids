@@ -12,9 +12,9 @@ class Score:
         self.tick_counter = 0
         self.font = font
 
-    def tick(self, x_loc, y_loc, style='Smooch Sans', size=50):
+    def tick(self, x_loc, y_loc, size=50):
         self.update()
-        self.render(x_loc, y_loc, style, size)
+        self.render(x_loc, y_loc, size)
 
     def update(self):
         # Update time
@@ -30,7 +30,7 @@ class Score:
         # Draw Score
         font = pygame.font.Font(self.font, size)
         A = 0.7
-        text_surface = font.render(str(self.score), False, (0 * A, 255 * A, 0 * A))
+        text_surface = font.render(str(self.score), False, (int(0 * A), int(255 * A), int(0 * A)))
         self.screen.blit(text_surface, (x_loc, y_loc))
     
     def bullet_fired(self):

@@ -50,17 +50,17 @@ def update_high_score(user, score, max_saved=15):
     high_scores = high_scores[:max_saved]
     store_high_score(high_scores)
 
-def get_current_high_scores():
+def get_current_high_scores() -> List[Tuple[str, int]]:
     try:
         # Reading high score file
         with open("shared_info/high_score") as file:
-            scores = list()
+            scores: List[Tuple[str, int]] = []
             for line in file.readlines():
                 user, score = line.split("=")
                 scores.append((user, int(score)))
         return scores
     except:
-        return list()
+        return []
 
 
 def store_high_score(scores:List[Tuple[str,int]]): # Ordered list

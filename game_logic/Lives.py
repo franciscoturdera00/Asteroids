@@ -5,12 +5,12 @@ import pygame
 
 class Lives:
 
-    def __init__(self, id, screen: pygame.Surface, num=3, scale=.4):
+    def __init__(self, id: int, screen: pygame.Surface, num: int = 3, scale: float = .4):
         self.id = id
-        self.number = num
+        self.number: int = num
         self.screen = screen
         A = 0.5
-        self.color = [255 * A, 255 * A, 255 * A]
+        self.color = (int(255 * A), int(255 * A), int(255 * A))
         self.life_shape = [(0, -24 * scale), (18 * scale, 24 * scale), (0, 18 * scale), (-18 * scale, 24 * scale)]
     
     # Returns False if player fully dies
