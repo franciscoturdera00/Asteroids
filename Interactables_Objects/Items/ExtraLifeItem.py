@@ -1,13 +1,14 @@
 
 import pygame
 from Interactables_Objects.Items.Item import Item
+from Interactables_Objects.Player import Player
 
 
 class ExtraLifeItem(Item):
 
     def __init__(self, screen, fps, players, initial_location, size, pick_up_sound_path="Sounds/life_item.wav"):
         A = 0.5
-        self.color = [255 * A, 255 * A, 255 * A]
+        self.color = (int(255 * A), int(255 * A), int(255 * A))
         super().__init__(screen, fps, players, initial_location, size, pick_up_sound_path)
 
     def render(self):
@@ -16,7 +17,7 @@ class ExtraLifeItem(Item):
         else:
             self._render_by_scale(0.2)
 
-    def perform_action_on_player(self, player):
+    def perform_action_on_player(self, player: Player):
         for p in self.players:
             if p != player and p.lives.number == 0:
                 p.revive()

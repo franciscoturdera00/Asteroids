@@ -1,7 +1,10 @@
 import math
+from typing import Callable, List
 import pygame
-from Interactables_Objects.Asteroid import SizeType
+from Interactables_Objects.Alien import Alien
+from Interactables_Objects.Asteroid import Asteroid, SizeType
 from Interactables_Objects.Items.Item import Item
+from game_logic.Score import Score
 
 class BlackHoleItem(Item):
 
@@ -12,33 +15,29 @@ class BlackHoleItem(Item):
         self.retreat_tick = 0
         super().__init__(screen, fps, players, initial_location, size, pick_up_sound_path)
     
-    def perform_action_on_asteroids(self, asteroids, play_sounds_function = None):
+    def perform_action_on_asteroids(self, asteroids: List[Asteroid], play_sounds_function: Callable[[int], None] | None = None):
         if self.ticks_since_grabbed * self.PACE <= self.NUKE_RADIUS:
-            def eat_everything():
-                for asteroid in asteroids:
-                    if asteroid.position.distance_to(self.position) <= self.ticks_since_grabbed * self.PACE:
-                        asteroids.remove(asteroid)
-                        play_sounds_function(asteroid.size)
-                        eat_everything()
-                        break
-            eat_everything()
+            radius = self.ticks_since_grabbed * self.PACE
+            consumed = [a for a in asteroids if a.position.distance_to(self.position) <= radius]
+            for asteroid in consumed:
+                asteroids.remove(asteroid)
+                if play_sounds_function:
+                    play_sounds_function(int(asteroid.size))
             return True
         return False
     
-    def perform_action_on_score(self, score):
+    def perform_action_on_score(self, score: Score):
         score.score += 15
         return super().perform_action_on_score(score)
 
-    def perform_action_on_aliens(self, aliens, play_sounds_function = None):
+    def perform_action_on_aliens(self, aliens: List[Alien], play_sounds_function: Callable[[int], None] | None = None):
         if self.ticks_since_grabbed * self.PACE <= self.NUKE_RADIUS:
-            def eat_everything():
-                for asteroid in aliens:
-                    if asteroid.position.distance_to(self.position) <= self.ticks_since_grabbed * self.PACE:
-                        aliens.remove(asteroid)
-                        play_sounds_function(SizeType.MEDIUM)
-                        eat_everything()
-                        break
-            eat_everything()
+            radius = self.ticks_since_grabbed * self.PACE
+            consumed = [a for a in aliens if a.position.distance_to(self.position) <= radius]
+            for alien in consumed:
+                aliens.remove(alien)
+                if play_sounds_function:
+                    play_sounds_function(SizeType.MEDIUM)
             return True
         return False
     

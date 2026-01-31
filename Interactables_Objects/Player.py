@@ -2,7 +2,7 @@
 from copy import deepcopy
 import math
 import random
-from typing import List
+from typing import List, Tuple
 import pygame
 
 from Interactables_Objects.Bullet import Bullet
@@ -26,7 +26,7 @@ class Player:
         self.id = id
         self.screen = screen
         self.position = position
-        self.velocity = [0,0]
+        self.velocity = pygame.Vector2(0, 0)
         self.scale = scale
         self.hitbox_radius = self.BOUNDS_RADIUS * scale
         self.original_color = color
@@ -60,16 +60,15 @@ class Player:
     
     def update(self):
         # Update Bullets
-        for i, bullet in enumerate(self.bullets):
-            if bullet.frames_left <= 0:
-                self.bullets.remove(bullet)
-            if i >= len(self.bullets):
-                break
+        expired_bullets = [bullet for bullet in self.bullets if bullet.frames_left <= 0]
+        for bullet in expired_bullets:
+            self.bullets.remove(bullet)
+        for bullet in self.bullets:
             bullet.update()
         
         # Move the player with its momentum
-        self.position.x = (self.position.x + self.velocity[0]) % self.screen.get_width()
-        self.position.y = (self.position.y + self.velocity[1]) % self.screen.get_height()
+        self.position.x = (self.position.x + self.velocity.x) % self.screen.get_width()
+        self.position.y = (self.position.y + self.velocity.y) % self.screen.get_height()
 
         # Handle invincibility
         if self.invincible:
@@ -83,7 +82,7 @@ class Player:
 
     def render(self):
         # Draw player according to the angular orientation of Player
-        updated_player_shape = list()
+        updated_player_shape: List[Tuple[float, float]] = []
         for point in self.player_shape:
             rotated_x, rotated_y = self._calculate_new_rotated_position(point, self._angle_in_radians())
             updated_player_shape.append((rotated_x, rotated_y))
@@ -95,7 +94,7 @@ class Player:
         
         # Draw Boost
         if self.boosting and self.show and random.random() < self.BOOST_SHOW_PERCENTAGE:
-            updated_boost_shape = list()
+            updated_boost_shape: List[Tuple[float, float]] = []
             for point in self.boost_shape:
                 rotated_boost_x, rotated_boost_y = self._calculate_new_rotated_position(point, self._angle_in_radians())
                 updated_boost_shape.append((rotated_boost_x, rotated_boost_y))
@@ -142,11 +141,11 @@ class Player:
         return math.pi * self.angle / 180
     
     def _accelerate(self, acceleration=ACCELERATION):
-        dir_x = -1 if self.velocity[0] < 0 else 1
-        dir_y = -1 if self.velocity[1] < 0 else 1
+        dir_x = -1 if self.velocity.x < 0 else 1
+        dir_y = -1 if self.velocity.y < 0 else 1
         # Updates the velocity of the Player object when a player thrusts
-        self.velocity[0] = self.velocity[0] + math.cos(self._angle_in_radians()) * acceleration if abs(self.velocity[0]) <= self.MAX_SPEED else self.MAX_SPEED * dir_x
-        self.velocity[1] = self.velocity[1] + math.sin(self._angle_in_radians()) * acceleration if abs(self.velocity[1]) <= self.MAX_SPEED else self.MAX_SPEED * dir_y
+        self.velocity.x = self.velocity.x + math.cos(self._angle_in_radians()) * acceleration if abs(self.velocity.x) <= self.MAX_SPEED else self.MAX_SPEED * dir_x
+        self.velocity.y = self.velocity.y + math.sin(self._angle_in_radians()) * acceleration if abs(self.velocity.y) <= self.MAX_SPEED else self.MAX_SPEED * dir_y
 
         # Sounds workaround for thrust and shooting happening together
         # thrust every 5 frames
@@ -162,7 +161,7 @@ class Player:
     
     def restart_position(self, invincible=True):
         self.position = pygame.Vector2(self.screen.get_width() / 2, self.screen.get_height() / 2)
-        self.velocity = [0,0]
+        self.velocity = pygame.Vector2(0, 0)
         if invincible:
             self.make_invincible()
     

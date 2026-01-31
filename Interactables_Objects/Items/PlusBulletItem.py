@@ -1,11 +1,6 @@
-
-from typing import List
 import pygame
-from Interactables_Objects.Alien import Alien
-from Interactables_Objects.Asteroid import Asteroid
 from Interactables_Objects.Items.Item import Item
 from Interactables_Objects.Player import Player
-from game_logic.Score import Score
 
 
 class PlusBulletItem(Item):
@@ -19,7 +14,7 @@ class PlusBulletItem(Item):
         else:
             pygame.draw.circle(self.screen, "red", self.position, self.size * 0.75)
     
-    def perform_action_on_player(self, player):
+    def perform_action_on_player(self, player: Player):
         player.max_bullets += 1
         return super().perform_action_on_player(player)
         
