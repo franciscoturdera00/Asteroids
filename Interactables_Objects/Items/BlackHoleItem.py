@@ -15,50 +15,48 @@ class BlackHoleItem(Item):
         self.retreat_tick = 0
         super().__init__(screen, fps, players, initial_location, size, pick_up_sound_path)
     
+    def _current_radius(self):
+        return self.ticks_since_grabbed * self.PACE
+
+    def _is_expanding(self):
+        return self._current_radius() <= self.NUKE_RADIUS
+
+    def _consume_entities(self, entities, play_sounds_function, get_sound_arg):
+        if not self._is_expanding():
+            return False
+        radius = self._current_radius()
+        consumed = [e for e in entities if e.position.distance_to(self.position) <= radius]
+        for entity in consumed:
+            entities.remove(entity)
+            if play_sounds_function:
+                play_sounds_function(get_sound_arg(entity))
+        return True
+
     def perform_action_on_asteroids(self, asteroids: List[Asteroid], play_sounds_function: Callable[[int], None] | None = None):
-        if self.ticks_since_grabbed * self.PACE <= self.NUKE_RADIUS:
-            radius = self.ticks_since_grabbed * self.PACE
-            consumed = [a for a in asteroids if a.position.distance_to(self.position) <= radius]
-            for asteroid in consumed:
-                asteroids.remove(asteroid)
-                if play_sounds_function:
-                    play_sounds_function(int(asteroid.size))
-            return True
-        return False
-    
+        return self._consume_entities(asteroids, play_sounds_function, lambda a: int(a.size))
+
     def perform_action_on_score(self, score: Score):
         score.score += 15
         return super().perform_action_on_score(score)
 
     def perform_action_on_aliens(self, aliens: List[Alien], play_sounds_function: Callable[[int], None] | None = None):
-        if self.ticks_since_grabbed * self.PACE <= self.NUKE_RADIUS:
-            radius = self.ticks_since_grabbed * self.PACE
-            consumed = [a for a in aliens if a.position.distance_to(self.position) <= radius]
-            for alien in consumed:
-                aliens.remove(alien)
-                if play_sounds_function:
-                    play_sounds_function(SizeType.MEDIUM)
-            return True
-        return False
+        return self._consume_entities(aliens, play_sounds_function, lambda _: SizeType.MEDIUM)
     
     def render(self):
-        if self.show:
-            self.draw_nuke(1)
-        else:
-            self.draw_nuke(0.5)
-        
+        self.draw_nuke(1 if self.show else 0.5)
+
     def render_item_effect(self):
-        if self.ticks_since_grabbed * self.PACE <= self.NUKE_RADIUS:
-            pygame.draw.circle(self.screen, "black", self.position, self.ticks_since_grabbed * self.PACE)
-            pygame.draw.circle(self.screen, "white", self.position, self.ticks_since_grabbed * self.PACE, 1)
+        if self._is_expanding():
+            radius = self._current_radius()
             self.retreat_tick = self.ticks_since_grabbed
-            return True
         elif self.retreat_tick * self.PACE >= 0:
-            pygame.draw.circle(self.screen, "black", self.position, self.retreat_tick * self.PACE)
-            pygame.draw.circle(self.screen, "white", self.position, self.retreat_tick * self.PACE, 1)
+            radius = self.retreat_tick * self.PACE
             self.retreat_tick -= 3
-            return True
-        return False
+        else:
+            return False
+        pygame.draw.circle(self.screen, "black", self.position, radius)
+        pygame.draw.circle(self.screen, "white", self.position, radius, 1)
+        return True
 
     # Function to draw the Nuke
     def draw_nuke(self, scale):

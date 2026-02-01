@@ -10,12 +10,9 @@ class Alien:
     HITBOX_SCALE = 5 / 6
 
 
-    def __init__(self, screen: pygame.Surface, fps, position: pygame.Vector2 = None, color = "white", size = 20, debugging_mode=False):
+    def __init__(self, screen: pygame.Surface, fps, color = "white", size = 20, debugging_mode=False):
         self.screen = screen
-        self.position = position
-        if position is None:
-            # Spawn at either side of the screen
-            self.position = pygame.Vector2(random.randrange(-5, 5) % screen.get_width(), random.randrange(0, screen.get_height()))
+        self.position = pygame.Vector2(random.randrange(-5, 5) % screen.get_width(), random.randrange(0, screen.get_height()))
         self.fps = fps
         self.size = size
         self.color = color
@@ -30,25 +27,24 @@ class Alien:
 
         self.debugging_mode=debugging_mode
 
+    def _set_new_goal(self, player_position):
+        self.goal = self._generate_random_point_within_square(player_position, 50)
+        self.velocity = self._generate_velocity_to_goal(self._random_time_frame())
+
     def update(self, player_positions):
         player_position = random.choice(player_positions)
         if self.move:
             self._move_towards_goal()
             if self.position.distance_to(self.goal) <= 3:
-                self.goal = self._generate_random_point_within_square(player_position, 50)
-                self.velocity = self._generate_velocity_to_goal(self._random_time_frame())
+                self._set_new_goal(player_position)
                 self.move = False
+        elif self.freeze_timer > 0:
+            self._chill()
+            self.freeze_timer -= 1
         else:
-            if self.freeze_timer > 0:
-                self._chill()
-                self.freeze_timer -= 1
-            else:
-                self.move = True
-                self.freeze_timer = self.fps * self.freeze_time_seconds
-                self.goal = self._generate_random_point_within_square(player_position, 50)
-                self.velocity = self._generate_velocity_to_goal(self._random_time_frame())
-
-        # print(self.goal.x, self.goal.y, self.position.x, self.position.y)
+            self.move = True
+            self.freeze_timer = self.fps * self.freeze_time_seconds
+            self._set_new_goal(player_position)
 
     def render(self):
         self._render_shape()
@@ -88,9 +84,8 @@ class Alien:
         self.position.y = (self.position.y + self.velocity.y) % (self.screen.get_height() + 10)
 
     def _chill(self):
-        sign = lambda : random.choice([-1, 1])
-        self.position.x += 0.1 * sign()
-        self.position.y += 0.1 * sign()
+        self.position.x += 0.1 * random.choice([-1, 1])
+        self.position.y += 0.1 * random.choice([-1, 1])
         
 
     def _random_time_frame(self, min=2, max=4):

@@ -13,12 +13,9 @@ class Lives:
         self.color = (int(255 * A), int(255 * A), int(255 * A))
         self.life_shape = [(0, -24 * scale), (18 * scale, 24 * scale), (0, 18 * scale), (-18 * scale, 24 * scale)]
     
-    # Returns False if player fully dies
     def die(self):
         self.number -= 1
-        if self.number <= 0:
-            return True
-        return False
+        return self.number <= 0
     
     def render(self):
         # Draw lives

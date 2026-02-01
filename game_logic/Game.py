@@ -2,17 +2,20 @@
 from copy import deepcopy
 import math
 import random
-from typing import  List, Tuple, Union
+from typing import  List, Tuple, TypeVar, Union
 import pygame
 
 from Interactables_Objects.Alien import Alien
 from Interactables_Objects.Asteroid import ASTEROID_ORDERED_SIZES, Asteroid, SizeType
+from Interactables_Objects.Bullet import Bullet
 from Interactables_Objects.Items.ExtraLifeItem import ExtraLifeItem
 from Interactables_Objects.Items.Item import Item
 from Interactables_Objects.Items.BlackHoleItem import BlackHoleItem
 from Interactables_Objects.Items.PlusBulletItem import PlusBulletItem
 from Interactables_Objects.Player import Player
 from game_logic.Score import Score
+
+T = TypeVar('T', Asteroid, Alien)
 
 # Asteroids Game
 # Create your own challenge (will pull settings from config file)
@@ -56,7 +59,7 @@ class Game:
 
         # NON-INTERACTABLE OBJECTS
         # Initiate Background Aesthetics
-        self.background_asteroids: List[Asteroid] = [Asteroid(self.screen, random.choice([s for s in SizeType]), background=True) for _ in range(self.num_background_asteroids)]
+        self.background_asteroids: List[Asteroid] = [Asteroid(self.screen, random.choice(list(SizeType)), background=True) for _ in range(self.num_background_asteroids)]
         
         self.picked_up_items: List[Tuple[Item, Player]] = list()
 
@@ -174,12 +177,8 @@ class Game:
         # Score
         self.score.update()
 
-        # Remove item if time's up
-        expired_items = [item for item in self.items if item.ticks_left <= 0]
-        for item in expired_items:
-            self.items.remove(item)
-
         # Items
+        self.items = [item for item in self.items if item.ticks_left > 0]
         for item in self.items:
             item.update()
 
@@ -197,9 +196,7 @@ class Game:
         for background_asteroid in self.background_asteroids:
             background_asteroid.render()
 
-        finished_items = [(item, player) for item, player in self.picked_up_items if not item.render_item_effect()]
-        for item_tuple in finished_items:
-            self.picked_up_items.remove(item_tuple)
+        self.picked_up_items = [(item, player) for item, player in self.picked_up_items if item.render_item_effect()]
 
         # Player and bullets
         for player in self.players:
@@ -239,14 +236,13 @@ class Game:
         boo = pygame.mixer.Sound("Sounds/booing_sound.wav")
         cheer = pygame.mixer.Sound("Sounds/applause.wav")
         channel = 2
-        # Play Sounds
         if self.win:
             pygame.mixer.Channel(channel).play(cheer)
             status_surface = font_title.render("YOU WIN!", False, (0, 180, 0))
             for player in self.players:
                 if not player.is_dead():
                     player.color = "green"
-        if not self.win:
+        else:
             pygame.mixer.Channel(channel).play(boo)
             status_surface = font_title.render("YOU LOSE!", False, (180, 0, 0))
             for player in self.players:
@@ -336,22 +332,13 @@ class Game:
         pygame.display.flip()
 
     def _player_collision_detected(self, player: Player) -> Union[Asteroid, Alien, None]:
-        return self._player_collision_with_asteroid_detected(player) or self._player_collision_with_alien_detected(player)
-        
-    def _player_collision_with_asteroid_detected(self, player: Player):
-        return self._player_collision_with_thing_detected(player, self.asteroids)
-    
-    def _player_collision_with_alien_detected(self, player: Player):
-        return self._player_collision_with_thing_detected(player, self.aliens)
-    
-    def _player_collision_with_thing_detected(self, player: Player, things: List):
-        if not player.invincible:
+        if player.invincible:
+            return None
+        for things in [self.asteroids, self.aliens]:
             for thing in things:
-                actual_distance = player.position.distance_to(thing.position)
-                min_distance = player.hitbox_radius + thing.hitbox_radius
-                if actual_distance <= min_distance:
+                if player.position.distance_to(thing.position) <= player.hitbox_radius + thing.hitbox_radius:
                     return thing
-        return False
+        return None
     
     def _win(self):
         self.score.win(sum([player.lives.number for player in self.players]))
@@ -375,9 +362,11 @@ class Game:
         self._handle_alien_bullet_collision()
     
     def _handle_asteroid_bullet_collisions(self):
-        asteroid: Asteroid
+        asteroid: Asteroid | None
+        player: Player | None
+        bullet: Bullet | None
         player, bullet, asteroid = self._handle_thing_bullet_collisions(self.asteroids)
-        if asteroid:
+        if asteroid and player and bullet:
             # Update bullets
             player.bullets.remove(bullet)
             # Update asteroids and its side effects
@@ -402,9 +391,11 @@ class Game:
 
 
     def _handle_alien_bullet_collision(self):
-        alien: Alien
+        alien: Alien | None
+        player: Player | None
+        bullet: Bullet | None
         player, bullet, alien = self._handle_thing_bullet_collisions(self.aliens)
-        if alien:
+        if alien and player and bullet:
             # Update bullets
             player.bullets.remove(bullet)
             # Update aliens and its side effects
@@ -421,19 +412,12 @@ class Game:
     
     def _spawn_item_with_chance(self, spawn_rate, position):
         if random.random() < spawn_rate:
-            item = None
-            bullet_item = PlusBulletItem(self.screen, self.fps, self.players, position.copy(), 5)
-            nuke_item = BlackHoleItem(self.screen, self.fps, self.players, position.copy(), 7)
-            extra_life_item = ExtraLifeItem(self.screen, self.fps, self.players, position.copy(), 7)
-            all_items = bullet_item, nuke_item, extra_life_item
-
-            # Probabilities are normalized. Probability values should be considered relative to their sum
-            item_pobabilities = 8, 1, 1
-            item_probabilities_norm = [float(prob)/sum(item_pobabilities) for prob in item_pobabilities]
-            item = random.choices(all_items, weights=item_probabilities_norm)[0]
-            self.items.append(item)
+            item_classes = [(PlusBulletItem, 5, 8), (BlackHoleItem, 7, 1), (ExtraLifeItem, 7, 1)]
+            weights = [weight for _, _, weight in item_classes]
+            item_class, size, _ = random.choices(item_classes, weights=weights)[0]
+            self.items.append(item_class(self.screen, self.fps, self.players, position.copy(), size))
                     
-    def _handle_thing_bullet_collisions(self, interactable_objects):
+    def _handle_thing_bullet_collisions(self, interactable_objects: List[T]) -> Tuple[Player | None, Bullet | None, T | None]:
         for player in self.players:
             for bullet in player.bullets:
                 for interactable_object in interactable_objects:
@@ -446,10 +430,10 @@ class Game:
                  
 
     def _play_asteroid_sound(self, asteroid_size):
-        # Play asteroid explosion sound
-        if asteroid_size == SizeType.LARGE.value:
-            self.explosion_sounds_big_to_small[0].play()
-        elif asteroid_size == SizeType.MEDIUM.value:
-            self.explosion_sounds_big_to_small[1].play()
-        elif asteroid_size == SizeType.SMALL.value:
-            self.explosion_sounds_big_to_small[2].play()
+        size_to_sound = {
+            SizeType.LARGE.value: 0,
+            SizeType.MEDIUM.value: 1,
+            SizeType.SMALL.value: 2
+        }
+        if asteroid_size in size_to_sound:
+            self.explosion_sounds_big_to_small[size_to_sound[asteroid_size]].play()

@@ -9,10 +9,8 @@ class PlusBulletItem(Item):
         super().__init__(screen, fps, players, initial_location, size, pick_up_sound_path)
 
     def render(self):
-        if self.show:
-            pygame.draw.circle(self.screen, "red", self.position, self.size)
-        else:
-            pygame.draw.circle(self.screen, "red", self.position, self.size * 0.75)
+        radius = self.size if self.show else self.size * 0.75
+        pygame.draw.circle(self.screen, "red", self.position, radius)
     
     def perform_action_on_player(self, player: Player):
         player.max_bullets += 1
