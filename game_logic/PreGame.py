@@ -22,7 +22,7 @@ class PreGame:
 
         # NON-INTERACTABLE OBJECTS
         # Initiate Background Aesthetics
-        self.background_asteroids: List[Asteroid] = [Asteroid(self.screen, random.choice([s for s in SizeType]), background=True) for _ in range(self.num_background_asteroids)]
+        self.background_asteroids: List[Asteroid] = [Asteroid(self.screen, random.choice(list(SizeType)), background=True) for _ in range(self.num_background_asteroids)]
 
     def run(self):
         #Background music
@@ -56,16 +56,15 @@ class PreGame:
             self.multiplayer = True
             return False
 
-        # Aesthetics only
-        [background_asteroid.update() for background_asteroid in self.background_asteroids]
+        for background_asteroid in self.background_asteroids:
+            background_asteroid.update()
 
         return True
 
     def render(self, font_title: pygame.font.Font, font_play_type: pygame.font.Font, size):
-        # fill the screen with a color to wipe away anything from last frame
         self.screen.fill("black")
-        # Aesthetics only
-        [background_asteroid.render() for background_asteroid in self.background_asteroids]
+        for background_asteroid in self.background_asteroids:
+            background_asteroid.render()
 
         spacing = 150
         color = (70, 200, 70)

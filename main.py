@@ -44,10 +44,8 @@ def main():
 
 
 def update_high_score(user, score, max_saved=15):
-    high_scores: List[Tuple[str,int]] = get_current_high_scores()
-    high_scores.append((user, score))
-    high_scores = sorted(high_scores, key=lambda score: score[1], reverse=True)
-    high_scores = high_scores[:max_saved]
+    high_scores = get_current_high_scores() + [(user, score)]
+    high_scores = sorted(high_scores, key=lambda s: s[1], reverse=True)[:max_saved]
     store_high_score(high_scores)
 
 def get_current_high_scores() -> List[Tuple[str, int]]:

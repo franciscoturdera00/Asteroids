@@ -25,22 +25,17 @@ class Asteroid:
     def __init__(self, screen: pygame.Surface, sizeType: SizeType, position = None, is_in_game_spawn=False, background=False, debugging_mode=False):
         self.screen = screen
         self.size: int = sizeType.value
-        sign = [-1, 1]
+        sign = random.choice([-1, 1])
 
         if position:
             self.position = position
-            self.x_vel = ((random.random() * (self.MAX_SPEED - self.MIN_SPEED)) + self.MIN_SPEED) * random.choice(sign)
-        
-        if not position:
-            if not is_in_game_spawn:
-                self.position = pygame.Vector2(random.randrange(0, screen.get_width()), random.randrange(0, screen.get_height()))
-                self.x_vel = self._generate_random_speed() * random.choice(sign)
-            else:
-                # Spawn at either side of the screen
-                self.position = pygame.Vector2(0, random.randrange(0, screen.get_height()))
-                self.x_vel = self._generate_random_speed() * random.choice([-1,1])
-            
-        self.y_vel = self._generate_random_speed() * random.choice(sign)
+        elif is_in_game_spawn:
+            self.position = pygame.Vector2(0, random.randrange(0, screen.get_height()))
+        else:
+            self.position = pygame.Vector2(random.randrange(0, screen.get_width()), random.randrange(0, screen.get_height()))
+
+        self.x_vel = self._generate_random_speed() * sign
+        self.y_vel = self._generate_random_speed() * random.choice([-1, 1])
 
         rgb = [255, 255, 255]
         R,G,B = rgb

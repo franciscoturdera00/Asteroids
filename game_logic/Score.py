@@ -16,36 +16,34 @@ class Score:
         self.update()
         self.render(x_loc, y_loc, size)
 
+    def _clamp_score(self):
+        self.score = max(self.score, 0)
+
     def update(self):
-        # Update time
         self.tick_counter += 1
-        # Lower the score every n ticks
         n = 75
         if self.tick_counter % n == 0:
             self.score -= n
-        # NNN
-        self.score = max(self.score, 0)
-    
+        self._clamp_score()
+
     def render(self, x_loc, y_loc, size=50):
-        # Draw Score
         font = pygame.font.Font(self.font, size)
-        A = 0.7
-        text_surface = font.render(str(self.score), False, (int(0 * A), int(255 * A), int(0 * A)))
+        text_surface = font.render(str(self.score), False, (0, 178, 0))
         self.screen.blit(text_surface, (x_loc, y_loc))
-    
+
     def bullet_fired(self):
         self.score -= 50
-        self.score = max(self.score, 0)
-    
+        self._clamp_score()
+
     def asteroid_hit(self, size):
         self.score += size * 50 * self.MULTIPLIER
 
     def alien_hit(self):
         self.score += 2000 * self.MULTIPLIER
-    
+
     def player_hit(self):
         self.score -= 700
-        self.score = max(self.score, 0)
+        self._clamp_score()
 
     def win(self, lives_left):
         self.score += 100000 * lives_left * self.MULTIPLIER

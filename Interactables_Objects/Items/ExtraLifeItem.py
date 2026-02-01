@@ -7,15 +7,11 @@ from Interactables_Objects.Player import Player
 class ExtraLifeItem(Item):
 
     def __init__(self, screen, fps, players, initial_location, size, pick_up_sound_path="Sounds/life_item.wav"):
-        A = 0.5
-        self.color = (int(255 * A), int(255 * A), int(255 * A))
+        self.color = (127, 127, 127)
         super().__init__(screen, fps, players, initial_location, size, pick_up_sound_path)
 
     def render(self):
-        if self.show:
-            self._render_by_scale(0.4)
-        else:
-            self._render_by_scale(0.2)
+        self._render_by_scale(0.4 if self.show else 0.2)
 
     def perform_action_on_player(self, player: Player):
         for p in self.players:

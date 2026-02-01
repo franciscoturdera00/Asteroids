@@ -60,9 +60,7 @@ class Player:
     
     def update(self):
         # Update Bullets
-        expired_bullets = [bullet for bullet in self.bullets if bullet.frames_left <= 0]
-        for bullet in expired_bullets:
-            self.bullets.remove(bullet)
+        self.bullets = [bullet for bullet in self.bullets if bullet.frames_left > 0]
         for bullet in self.bullets:
             bullet.update()
         
@@ -81,24 +79,15 @@ class Player:
         
 
     def render(self):
-        # Draw player according to the angular orientation of Player
-        updated_player_shape: List[Tuple[float, float]] = []
-        for point in self.player_shape:
-            rotated_x, rotated_y = self._calculate_new_rotated_position(point, self._angle_in_radians())
-            updated_player_shape.append((rotated_x, rotated_y))
+        angle = self._angle_in_radians()
+        updated_player_shape = [self._calculate_new_rotated_position(point, angle) for point in self.player_shape]
         if self.show:
-            if self.invincible:
-                pygame.draw.polygon(self.screen, "gold", [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)  
-            else:
-                pygame.draw.polygon(self.screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
+            color = "gold" if self.invincible else self.color
+            pygame.draw.polygon(self.screen, color, [(self.position.x + x, self.position.y + y) for x, y in updated_player_shape], 2)
         
         # Draw Boost
         if self.boosting and self.show and random.random() < self.BOOST_SHOW_PERCENTAGE:
-            updated_boost_shape: List[Tuple[float, float]] = []
-            for point in self.boost_shape:
-                rotated_boost_x, rotated_boost_y = self._calculate_new_rotated_position(point, self._angle_in_radians())
-                updated_boost_shape.append((rotated_boost_x, rotated_boost_y))
-        
+            updated_boost_shape = [self._calculate_new_rotated_position(point, angle) for point in self.boost_shape]
             pygame.draw.polygon(self.screen, self.color, [(self.position.x + x, self.position.y + y) for x, y in updated_boost_shape], 2)
 
         if self.debugging_mode:
@@ -115,15 +104,13 @@ class Player:
 
     def receive_commands(self):
         keys = pygame.key.get_pressed()
-        if any(keys[rotate_left] for rotate_left in self.rotate_left):
+        if any(keys[k] for k in self.rotate_left):
             self.rotate_angle(-1)
-        if any(keys[rotate_right] for rotate_right in self.rotate_right):
+        if any(keys[k] for k in self.rotate_right):
             self.rotate_angle(1)
-        if any(keys[boost] for boost in self.boost):
+        self.boosting = any(keys[k] for k in self.boost)
+        if self.boosting:
             self._accelerate()
-            self.boosting = True
-        if not any(keys[boost] for boost in self.boost):
-            self.boosting = False
 
     def shoot_bullet(self, score: Score):
         if not self.is_dead() and not self.invincible and len(self.bullets) < self.max_bullets:
@@ -167,8 +154,7 @@ class Player:
     
     def revive(self, restart_position=True, invincible=True):
         self.color = self.original_color
-        if self.lives.number <= 0:
-            self.lives.number = 1
+        self.lives.number = max(self.lives.number, 1)
         if restart_position:
             self.restart_position(invincible=invincible)
         elif invincible:
